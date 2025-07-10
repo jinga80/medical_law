@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}채용 요청 잠금 해제 확인{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">채용 요청 잠금 해제 확인</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="alert alert-info" role="alert">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-info-circle"></i> 잠금 해제 안내
+                        </h5>
+                        <p>채용 요청 잠금을 해제하면 다음과 같은 기능이 다시 활성화됩니다:</p>
+                        <ul>
+                            <li>기본 요청 내용을 수정할 수 있습니다</li>
+                            <li>추가 요청사항도 계속 등록할 수 있습니다</li>
+                            <li>요청 상태를 변경할 수 있습니다</li>
+                        </ul>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>요청 정보</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>요청 ID:</strong></td>
+                                    <td>{{ job_request.request_id }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>병원명:</strong></td>
+                                    <td>{{ job_request.hospital_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>포지션:</strong></td>
+                                    <td>{{ job_request.position_title }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>부서:</strong></td>
+                                    <td>{{ job_request.department }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>상태:</strong></td>
+                                    <td>
+                                        <span class="badge bg-{{ job_request.get_status_color }}">
+                                            {{ job_request.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>잠금 처리자:</strong></td>
+                                    <td>{{ job_request.locked_by.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>잠금 시간:</strong></td>
+                                    <td>{{ job_request.locked_at|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-info btn-lg">
+                                <i class="fas fa-unlock"></i> 잠금 해제
+                            </button>
+                            <a href="{% url 'workflow:job_request_detail' job_request.id %}" class="btn btn-secondary btn-lg ms-2">
+                                <i class="fas fa-times"></i> 취소
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

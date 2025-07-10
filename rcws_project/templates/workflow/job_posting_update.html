@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}채용 공고 수정{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box bg-gradient-warning text-white rounded-3 shadow-sm" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);">
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <div class="page-title-left">
+                        <h2 class="page-title mb-2 fw-bold" style="font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="mdi mdi-pencil me-3"></i>채용 공고 수정
+                        </h2>
+                        <ol class="breadcrumb m-0" style="font-size: 0.95rem;">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-home me-1"></i>홈
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'workflow:job_posting_list' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-briefcase-search me-1"></i>채용 공고
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'workflow:job_posting_detail' posting.id %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-briefcase me-1"></i>상세
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">
+                                <i class="mdi mdi-chevron-right mx-2"></i>수정
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="page-title-right">
+                        <a href="{% url 'workflow:job_posting_detail' posting.id %}" class="btn btn-light">
+                            <i class="mdi mdi-arrow-left me-1"></i>상세로
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Form -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-briefcase me-2"></i>채용 공고 수정
+                    </h5>
+                    <p class="text-muted mb-0 mt-2">실제 게시된 정보만 수정할 수 있습니다.</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- External Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">외부 게시 정보</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.posting_platform.id_for_label }}" class="form-label">
+                                    게시 플랫폼
+                                </label>
+                                {{ form.posting_platform }}
+                                {% if form.posting_platform.errors %}
+                                    <div class="text-danger small mt-1">{{ form.posting_platform.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.posting_url.id_for_label }}" class="form-label">
+                                    공고 링크
+                                </label>
+                                {{ form.posting_url }}
+                                {% if form.posting_url.errors %}
+                                    <div class="text-danger small mt-1">{{ form.posting_url.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.posting_image.id_for_label }}" class="form-label">
+                                    공고 이미지
+                                </label>
+                                {% if posting.posting_image %}
+                                    <div class="mb-2">
+                                        <img src="{{ posting.posting_image.url }}" alt="현재 이미지" class="rounded" width="200" style="object-fit: cover;">
+                                        <small class="text-muted d-block mt-1">현재 이미지</small>
+                                    </div>
+                                {% endif %}
+                                {{ form.posting_image }}
+                                {% if form.posting_image.errors %}
+                                    <div class="text-danger small mt-1">{{ form.posting_image.errors.0 }}</div>
+                                {% endif %}
+                                <div class="form-text">채용 공고 스크린샷이나 관련 이미지를 업로드하세요.</div>
+                            </div>
+                        </div>
+
+                        <!-- Settings -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">설정</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label">
+                                    상태
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4">
+                                    {{ form.is_featured }}
+                                    <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
+                                        주요 공고로 설정
+                                    </label>
+                                </div>
+                                {% if form.is_featured.errors %}
+                                    <div class="text-danger small mt-1">{{ form.is_featured.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="mdi mdi-content-save me-1"></i>수정
+                                    </button>
+                                    <a href="{% url 'workflow:job_posting_detail' posting.id %}" class="btn btn-outline-secondary">
+                                        <i class="mdi mdi-close me-1"></i>취소
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-xl-4 col-lg-5">
+            <!-- Current Posting Info -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-briefcase me-2"></i>현재 공고 정보
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>제목:</strong> {{ posting.title }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>상태:</strong>
+                        {% if posting.status == 'draft' %}
+                            <span class="badge bg-secondary">{{ posting.get_status_display }}</span>
+                        {% elif posting.status == 'published' %}
+                            <span class="badge bg-success">{{ posting.get_status_display }}</span>
+                        {% elif posting.status == 'paused' %}
+                            <span class="badge bg-warning">{{ posting.get_status_display }}</span>
+                        {% elif posting.status == 'closed' %}
+                            <span class="badge bg-danger">{{ posting.get_status_display }}</span>
+                        {% elif posting.status == 'expired' %}
+                            <span class="badge bg-dark">{{ posting.get_status_display }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <strong>조회수:</strong> {{ posting.view_count }}
+                        <br><strong>지원자 수:</strong> {{ posting.application_count }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>게시일:</strong> {{ posting.posting_date|date:"Y-m-d H:i" }}
+                        <br><strong>마감일:</strong> {{ posting.closing_date|date:"Y-m-d H:i" }}
+                    </div>
+                    {% if posting.posting_platform %}
+                    <div class="mb-3">
+                        <strong>플랫폼:</strong> {{ posting.get_platform_display_name }}
+                    </div>
+                    {% endif %}
+                    {% if posting.posting_url %}
+                    <div class="mb-3">
+                        <strong>링크:</strong>
+                        <br><a href="{{ posting.posting_url }}" target="_blank" class="text-decoration-none">
+                            <i class="mdi mdi-link"></i> 공고 링크
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Job Request Info -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-hospital me-2"></i>병원 정보
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>{{ posting.job_request.hospital_name }}</strong>
+                        {% if posting.job_request.hospital_branch %}
+                            <br><small class="text-muted">{{ posting.job_request.hospital_branch }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <strong>포지션:</strong> {{ posting.job_request.position_title }}
+                        <br><strong>부서:</strong> {{ posting.job_request.department }}
+                        <br><strong>고용형태:</strong> {{ posting.job_request.get_employment_type_display }}
+                    </div>
+                    {% if posting.job_request.salary_min or posting.job_request.salary_max %}
+                    <div class="mb-3">
+                        <strong>급여:</strong>
+                        {% if posting.job_request.salary_min and posting.job_request.salary_max %}
+                            {{ posting.job_request.salary_min }}만원 ~ {{ posting.job_request.salary_max }}만원
+                        {% elif posting.job_request.salary_min %}
+                            {{ posting.job_request.salary_min }}만원 이상
+                        {% elif posting.job_request.salary_max %}
+                            {{ posting.job_request.salary_max }}만원 이하
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-lightbulb me-2"></i>수정 팁
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="mdi mdi-check-circle text-success me-2"></i>
+                            실제 게시된 링크를 정확히 입력하세요
+                        </li>
+                        <li class="mb-2">
+                            <i class="mdi mdi-check-circle text-success me-2"></i>
+                            공고 스크린샷을 업로드하면 관리가 편리합니다
+                        </li>
+                        <li class="mb-2">
+                            <i class="mdi mdi-check-circle text-success me-2"></i>
+                            게시 플랫폼을 선택하면 통계 분석에 도움이 됩니다
+                        </li>
+                        <li class="mb-2">
+                            <i class="mdi mdi-check-circle text-success me-2"></i>
+                            주요 공고로 설정하면 우선적으로 표시됩니다
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+    color: #000;
+}
+</style>
+{% endblock %} 

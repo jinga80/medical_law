@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ evaluation.candidate.name }} - 평가 상세{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:main' %}">대시보드</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'evaluations:list' %}">평가 목록</a></li>
+                        <li class="breadcrumb-item active">{{ evaluation.candidate.name }}</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">{{ evaluation.candidate.name }} - 평가 상세</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-4 col-lg-5">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        {% if evaluation.candidate.profile_image %}
+                            <img src="{{ evaluation.candidate.profile_image.url }}" class="rounded-circle avatar-lg img-thumbnail" alt="프로필 이미지">
+                        {% else %}
+                            <div class="avatar-lg mx-auto bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                                <span class="text-white font-weight-bold" style="font-size: 2rem;">{{ evaluation.candidate.name|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <h4 class="mb-1">{{ evaluation.candidate.name }}</h4>
+                    <p class="text-muted">{{ evaluation.candidate.target_position }}</p>
+
+                    <div class="mt-3">
+                        <span class="badge bg-{{ evaluation.get_score_color }} fs-6">{{ evaluation.score }}/5점</span>
+                    </div>
+
+                    <div class="text-start mt-3">
+                        <h4 class="font-13 text-uppercase">평가 정보</h4>
+                        <p class="text-muted font-13 mb-3">
+                            <strong>평가 유형:</strong> {{ evaluation.get_evaluation_type_display }}<br>
+                            <strong>평가자:</strong> {{ evaluation.evaluator.get_full_name }}<br>
+                            <strong>평가일:</strong> {{ evaluation.created_at|date:"Y-m-d H:i" }}<br>
+                            <strong>상태:</strong> 
+                            {% if evaluation.is_completed %}
+                                <span class="badge bg-success">완료</span>
+                            {% else %}
+                                <span class="badge bg-warning">진행중</span>
+                            {% endif %}
+                        </p>
+
+                        <h4 class="font-13 text-uppercase">후보자 정보</h4>
+                        <p class="text-muted font-13 mb-0">
+                            <strong>이메일:</strong> {{ evaluation.candidate.email }}<br>
+                            <strong>전화번호:</strong> {{ evaluation.candidate.phone }}<br>
+                            <strong>경력:</strong> {{ evaluation.candidate.years_of_experience }}년<br>
+                            <strong>현재 직장:</strong> {{ evaluation.candidate.current_company|default:"-" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="header-title mb-3">작업</h4>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'evaluations:update' evaluation.id %}" class="btn btn-primary">
+                            <i class="mdi mdi-pencil me-2"></i>평가 수정
+                        </a>
+                        <a href="{% url 'candidates:detail' evaluation.candidate.id %}" class="btn btn-info">
+                            <i class="mdi mdi-account me-2"></i>후보자 정보
+                        </a>
+                        <a href="#" class="btn btn-success">
+                            <i class="mdi mdi-file-pdf me-2"></i>평가서 출력
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8 col-lg-7">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-pills nav-fill navtab-bg">
+                        <li class="nav-item">
+                            <a href="#scores" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+                                평가 점수
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#comments" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                                평가 의견
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#history" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                                평가 이력
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane show active" id="scores">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="mb-3">기술 역량</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">전문 지식</label>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: {{ evaluation.technical_knowledge|multiply:20 }}%;" 
+                                                         aria-valuenow="{{ evaluation.technical_knowledge }}" aria-valuemin="0" aria-valuemax="5"></div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-primary">{{ evaluation.technical_knowledge }}/5</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">실무 경험</label>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: {{ evaluation.practical_experience|multiply:20 }}%;" 
+                                                         aria-valuenow="{{ evaluation.practical_experience }}" aria-valuemin="0" aria-valuemax="5"></div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-primary">{{ evaluation.practical_experience }}/5</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">문제 해결 능력</label>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: {{ evaluation.problem_solving|multiply:20 }}%;" 
+                                                         aria-valuenow="{{ evaluation.problem_solving }}" aria-valuemin="0" aria-valuemax="5"></div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-primary">{{ evaluation.problem_solving }}/5</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h5 class="mb-3">인성 및 소프트 스킬</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">의사소통 능력</label>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: {{ evaluation.communication|multiply:20 }}%;" 
+                                                         aria-valuenow="{{ evaluation.communication }}" aria-valuemin="0" aria-valuemax="5"></div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-success">{{ evaluation.communication }}/5</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">팀워크</label>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: {{ evaluation.teamwork|multiply:20 }}%;" 
+                                                         aria-valuenow="{{ evaluation.teamwork }}" aria-valuemin="0" aria-valuemax="5"></div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-success">{{ evaluation.teamwork }}/5</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">적응력</label>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1 me-2">
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: {{ evaluation.adaptability|multiply:20 }}%;" 
+                                                         aria-valuenow="{{ evaluation.adaptability }}" aria-valuemin="0" aria-valuemax="5"></div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-success">{{ evaluation.adaptability }}/5</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h4 class="mb-2">종합 평가</h4>
+                                            <div class="display-4 text-{{ evaluation.get_score_color }}">{{ evaluation.score }}/5</div>
+                                            <p class="text-muted mb-0">{{ evaluation.get_score_description }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="comments">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5>강점</h5>
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            {{ evaluation.strengths|linebreaks|default:"강점에 대한 평가가 없습니다." }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h5>개선점</h5>
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            {{ evaluation.weaknesses|linebreaks|default:"개선점에 대한 평가가 없습니다." }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h5>추천 의견</h5>
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            {{ evaluation.recommendation|linebreaks|default:"추천 의견이 없습니다." }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if evaluation.additional_comments %}
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h5>추가 의견</h5>
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            {{ evaluation.additional_comments|linebreaks }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="tab-pane" id="history">
+                            <div class="table-responsive">
+                                <table class="table table-centered table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>평가자</th>
+                                            <th>평가 유형</th>
+                                            <th>점수</th>
+                                            <th>평가일</th>
+                                            <th>상태</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for eval_history in evaluation.candidate.evaluations.all %}
+                                        <tr>
+                                            <td>{{ eval_history.evaluator.get_full_name }}</td>
+                                            <td>{{ eval_history.get_evaluation_type_display }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ eval_history.get_score_color }}">{{ eval_history.score }}/5</span>
+                                            </td>
+                                            <td>{{ eval_history.created_at|date:"Y-m-d" }}</td>
+                                            <td>
+                                                {% if eval_history.is_completed %}
+                                                    <span class="badge bg-success">완료</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">진행중</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">평가 이력이 없습니다.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

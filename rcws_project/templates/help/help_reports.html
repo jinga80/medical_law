@@ -1,0 +1,437 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}보고서 사용법 - RCWS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-title-box bg-gradient-secondary text-white rounded-3 shadow-sm" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <div class="page-title-left">
+                        <h2 class="page-title mb-2 fw-bold" style="font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="mdi mdi-chart-bar me-3"></i>보고서 사용법
+                        </h2>
+                        <ol class="breadcrumb m-0" style="font-size: 0.95rem;">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-home me-1"></i>홈
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'help:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-help-circle me-1"></i>사용 설명서
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">
+                                <i class="mdi mdi-chevron-right mx-2"></i>보고서
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- 보고서 개요 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-information me-2"></i>보고서란?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        보고서는 채용 프로세스의 현황과 성과를 데이터 기반으로 분석하여 제공하는 기능입니다.
+                        의사결정을 지원하고 채용 전략을 수립하는 데 도움을 줍니다.
+                    </p>
+                    <div class="alert alert-secondary">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-lightbulb me-1"></i>보고서의 주요 기능
+                        </h6>
+                        <ul class="mb-0">
+                            <li>채용 현황 통계</li>
+                            <li>후보자 분석</li>
+                            <li>평가 결과 분석</li>
+                            <li>성과 지표 추적</li>
+                            <li>트렌드 분석</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 보고서 종류 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-file-document me-2"></i>보고서 종류
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-primary">
+                                    <i class="mdi mdi-chart-pie me-2"></i>채용 현황 보고서
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    전체 채용 프로세스의 현황을 한눈에 파악할 수 있습니다.
+                                </p>
+                                <ul class="small text-muted">
+                                    <li>후보자 등록 현황</li>
+                                    <li>진행 단계별 통계</li>
+                                    <li>승인/거절 비율</li>
+                                    <li>채용 완료 현황</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-success">
+                                    <i class="mdi mdi-account-group me-2"></i>후보자 분석 보고서
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    후보자들의 특성과 패턴을 분석합니다.
+                                </p>
+                                <ul class="small text-muted">
+                                    <li>지원 직무별 분포</li>
+                                    <li>경력 수준 분석</li>
+                                    <li>지역별 분포</li>
+                                    <li>평가 점수 분석</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-warning">
+                                    <i class="mdi mdi-clipboard-check me-2"></i>평가 성과 보고서
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    평가 과정과 결과를 분석합니다.
+                                </p>
+                                <ul class="small text-muted">
+                                    <li>평가자별 성과</li>
+                                    <li>평가 항목별 분석</li>
+                                    <li>평가 시간 분석</li>
+                                    <li>평가 품질 지표</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-info">
+                                    <i class="mdi mdi-trending-up me-2"></i>트렌드 분석 보고서
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    시간에 따른 변화와 트렌드를 분석합니다.
+                                </p>
+                                <ul class="small text-muted">
+                                    <li>월별/분기별 추이</li>
+                                    <li>시장 변화 분석</li>
+                                    <li>예측 모델링</li>
+                                    <li>비교 분석</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 보고서 생성 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-plus-circle me-2"></i>보고서 생성하기
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">생성 방법</h6>
+                            <ol class="small text-muted">
+                                <li>보고서 목록에서 "새 보고서" 버튼 클릭</li>
+                                <li>보고서 유형 선택</li>
+                                <li>분석 기간 설정</li>
+                                <li>필터 조건 설정</li>
+                                <li>보고서 제목 입력</li>
+                                <li>"생성" 버튼 클릭</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-info mb-3">필터 옵션</h6>
+                            <ul class="small text-muted">
+                                <li><strong>기간</strong> - 분석할 기간 설정</li>
+                                <li><strong>직무</strong> - 특정 직무 필터링</li>
+                                <li><strong>평가자</strong> - 특정 평가자 필터링</li>
+                                <li><strong>상태</strong> - 후보자 상태별 필터링</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-success mt-3">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-tip me-1"></i>보고서 생성 팁
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>분석 목적에 맞는 적절한 기간을 설정하세요</li>
+                            <li>필요한 필터를 적용하여 정확한 데이터를 확보하세요</li>
+                            <li>보고서 제목은 내용을 명확히 표현하세요</li>
+                            <li>정기적으로 동일한 조건의 보고서를 생성하여 비교하세요</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 보고서 해석 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-magnify me-2"></i>보고서 해석하기
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-warning mb-3">주요 지표</h6>
+                            <ul class="small text-muted">
+                                <li><strong>채용 전환율</strong> - 후보자 등록 대비 채용 완료 비율</li>
+                                <li><strong>평균 평가 점수</strong> - 전체 후보자의 평균 평가 점수</li>
+                                <li><strong>평가 완료율</strong> - 평가 대상 대비 완료 비율</li>
+                                <li><strong>평균 처리 시간</strong> - 단계별 평균 처리 시간</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-info mb-3">분석 포인트</h6>
+                            <ul class="small text-muted">
+                                <li>트렌드 변화 패턴</li>
+                                <li>성과 개선 영역</li>
+                                <li>비효율적인 프로세스</li>
+                                <li>예상 문제점</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-information me-1"></i>해석 시 주의사항
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>데이터의 맥락을 고려하여 해석하세요</li>
+                            <li>단순한 수치가 아닌 의미를 파악하세요</li>
+                            <li>여러 지표를 종합적으로 분석하세요</li>
+                            <li>변화의 원인을 추적하여 개선점을 도출하세요</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 보고서 공유 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-share me-2"></i>보고서 공유 및 내보내기
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-info mb-3">내보내기 형식</h6>
+                            <ul class="small text-muted">
+                                <li><strong>PDF</strong> - 인쇄 및 공유용</li>
+                                <li><strong>Excel</strong> - 데이터 분석용</li>
+                                <li><strong>CSV</strong> - 데이터 처리용</li>
+                                <li><strong>이미지</strong> - 프레젠테이션용</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">공유 방법</h6>
+                            <ul class="small text-muted">
+                                <li>이메일 첨부</li>
+                                <li>링크 공유</li>
+                                <li>다운로드 링크</li>
+                                <li>직접 전달</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-security me-1"></i>보안 주의사항
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>민감한 정보가 포함된 보고서는 신중하게 공유하세요</li>
+                            <li>공유 대상자의 권한을 확인하세요</li>
+                            <li>보고서 접근 로그를 정기적으로 확인하세요</li>
+                            <li>불필요한 보고서는 적절히 보관하거나 삭제하세요</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 팁과 모범 사례 -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-lightbulb me-2"></i>팁과 모범 사례
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-calendar me-1"></i>정기적 생성
+                                </h6>
+                                <p class="small mb-0">
+                                    월별, 분기별로 정기적인 보고서를 생성하여 추세를 파악하세요.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-target me-1"></i>목적 명확화
+                                </h6>
+                                <p class="small mb-0">
+                                    보고서 생성 목적을 명확히 하여 필요한 데이터를 선별하세요.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-account-group me-1"></i>팀 공유
+                                </h6>
+                                <p class="small mb-0">
+                                    관련 팀원들과 보고서를 공유하여 협업을 강화하세요.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-refresh me-1"></i>지속적 개선
+                                </h6>
+                                <p class="small mb-0">
+                                    보고서 분석 결과를 바탕으로 프로세스를 지속적으로 개선하세요.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사이드바 -->
+        <div class="col-lg-4">
+            <!-- 빠른 링크 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-link me-2"></i>빠른 링크
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'reports:report_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="mdi mdi-chart-bar me-2"></i>보고서 목록
+                        </a>
+                        <a href="{% url 'reports:create' %}" class="btn btn-outline-success btn-sm">
+                            <i class="mdi mdi-plus-circle me-2"></i>새 보고서 생성
+                        </a>
+                        <a href="{% url 'dashboard:main' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="mdi mdi-view-dashboard me-2"></i>대시보드
+                        </a>
+                        <a href="{% url 'candidates:list' %}" class="btn btn-outline-warning btn-sm">
+                            <i class="mdi mdi-account-group me-2"></i>후보자 목록
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 보고서 유형 가이드 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-file-document me-2"></i>보고서 유형
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="badge bg-primary me-2">현황</span>
+                        <small class="text-muted">채용 현황 통계</small>
+                    </div>
+                    <div class="mb-3">
+                        <span class="badge bg-success me-2">분석</span>
+                        <small class="text-muted">후보자 분석</small>
+                    </div>
+                    <div class="mb-3">
+                        <span class="badge bg-warning me-2">성과</span>
+                        <small class="text-muted">평가 성과 분석</small>
+                    </div>
+                    <div class="mb-3">
+                        <span class="badge bg-info me-2">트렌드</span>
+                        <small class="text-muted">트렌드 분석</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 문제 해결 -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-wrench me-2"></i>문제 해결
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="mb-2">보고서가 생성되지 않아요</h6>
+                        <p class="small text-muted mb-0">
+                            필수 설정을 모두 완료했는지 확인하고 다시 시도해보세요.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="mb-2">데이터가 부정확해요</h6>
+                        <p class="small text-muted mb-0">
+                            필터 조건을 확인하고 분석 기간을 점검해보세요.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="mb-2">내보내기가 안 돼요</h6>
+                        <p class="small text-muted mb-0">
+                            브라우저 설정을 확인하고 팝업 차단을 해제해보세요.
+                        </p>
+                    </div>
+                    <a href="{% url 'help:contact' %}" class="btn btn-outline-warning btn-sm w-100">
+                        <i class="mdi mdi-help-circle me-1"></i>추가 도움 요청
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-success:hover,
+.btn-outline-primary:hover,
+.btn-outline-warning:hover {
+    transform: translateY(-1px);
+}
+
+.alert-light {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}보고서 수정{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"보고서 수정" icon="mdi-chart-line" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">보고서 수정</h5>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label">보고서 제목</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ report.title }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">보고서 설명</label>
+                            <textarea class="form-control" id="description" name="description" rows="4">{{ report.description }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="report_type" class="form-label">보고서 유형</label>
+                                    <select class="form-select" id="report_type" name="report_type">
+                                        <option value="performance">성과 보고서</option>
+                                        <option value="candidate">후보자 분석</option>
+                                        <option value="workflow">채용 분석</option>
+                                        <option value="interview">면접 일정</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="period" class="form-label">보고 기간</label>
+                                    <select class="form-select" id="period" name="period">
+                                        <option value="weekly">주간</option>
+                                        <option value="monthly" selected>월간</option>
+                                        <option value="quarterly">분기</option>
+                                        <option value="yearly">연간</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <a href="{% url 'reports:detail' report.id %}" class="btn btn-secondary">취소</a>
+                            <button type="submit" class="btn btn-primary">수정 완료</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

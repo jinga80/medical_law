@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load workflow_extras %}
+
+{% block title %}채용 요청 템플릿 목록{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"채용 요청 템플릿 관리" icon="mdi-file-document-multiple" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">채용 요청 템플릿</h5>
+                        <a href="{% url 'workflow:template_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> 새 템플릿 생성
+                        </a>
+                    </div>
+                    
+                    {% if templates %}
+                        <div class="row">
+                            {% for template in templates %}
+                            <div class="col-lg-6 col-xl-4 mb-4">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-header bg-transparent">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">
+                                                {% if template.is_default %}
+                                                    <span class="badge bg-success me-2">기본</span>
+                                                {% endif %}
+                                                {{ template.name }}
+                                            </h6>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="{% url 'workflow:template_detail' template.pk %}">
+                                                        <i class="fas fa-eye"></i> 상세보기
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="{% url 'workflow:template_update' template.pk %}">
+                                                        <i class="fas fa-edit"></i> 수정
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="{% url 'workflow:job_request_create_from_template' template.pk %}">
+                                                        <i class="fas fa-plus"></i> 요청 생성
+                                                    </a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="{% url 'workflow:template_delete' template.pk %}">
+                                                        <i class="fas fa-trash"></i> 삭제
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if template.description %}
+                                            <p class="text-muted small mb-3">{{ template.description|truncatewords:20 }}</p>
+                                        {% endif %}
+                                        
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <small class="text-muted d-block">포지션</small>
+                                                <strong>{{ template.position_title }}</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted d-block">부서</small>
+                                                <strong>{{ template.department }}</strong>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <small class="text-muted d-block">고용 형태</small>
+                                                <span class="badge bg-info">{{ template.get_employment_type_display }}</span>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted d-block">긴급도</small>
+                                                <span class="badge bg-{{ template.urgency_level|status_color }}">{{ template.get_urgency_level_display }}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        {% if template.salary_min or template.salary_max %}
+                                        <div class="mb-3">
+                                            <small class="text-muted d-block">급여 범위</small>
+                                            <strong>
+                                                {% if template.salary_min and template.salary_max %}
+                                                    {{ template.salary_min }}만원 ~ {{ template.salary_max }}만원
+                                                {% elif template.salary_min %}
+                                                    {{ template.salary_min }}만원 이상
+                                                {% elif template.salary_max %}
+                                                    {{ template.salary_max }}만원 이하
+                                                {% endif %}
+                                            </strong>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if template.hospital_name %}
+                                        <div class="mb-3">
+                                            <small class="text-muted d-block">병원 정보</small>
+                                            <strong>{{ template.hospital_name }}</strong>
+                                            {% if template.hospital_branch %}
+                                                <small class="text-muted d-block">{{ template.hospital_branch }}</small>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-user"></i> {{ template.created_by.get_full_name }}
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar"></i> {{ template.created_at|date:"Y-m-d" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">등록된 템플릿이 없습니다</h5>
+                            <p class="text-muted">채용 요청을 빠르게 생성할 수 있는 템플릿을 만들어보세요.</p>
+                            <a href="{% url 'workflow:template_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> 첫 번째 템플릿 생성
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %} 

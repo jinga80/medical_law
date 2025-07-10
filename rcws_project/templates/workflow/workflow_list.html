@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}채용 목록{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"채용 목록" icon="mdi-briefcase-multiple" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-sm-4">
+                            <a href="{% url 'workflow:create' %}" class="btn btn-primary mb-2">
+                                <i class="mdi mdi-plus-circle me-2"></i>새 채용 생성
+                            </a>
+                            <a href="{% url 'help:workflow' %}" class="btn btn-outline-info mb-2 ms-2" title="채용 관리 도움말">
+                                <i class="mdi mdi-help-circle me-1"></i>도움말
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="text-sm-end">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="채용 검색...">
+                                    <button class="btn btn-secondary" type="button">
+                                        <i class="mdi mdi-magnify"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>채용</th>
+                                    <th>담당자</th>
+                                    <th>상태</th>
+                                    <th>진행률</th>
+                                    <th>마감일</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for workflow in workflows %}
+                                <tr>
+                                    <td>
+                                        <h5 class="font-14 my-1 fw-normal">{{ workflow.title }}</h5>
+                                        <span class="text-muted font-13">{{ workflow.description|truncatechars:100 }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if workflow.assigned_to.profile_image %}
+                                                <img src="{{ workflow.assigned_to.profile_image.url }}" alt="user" class="me-2 rounded-circle" width="32">
+                                            {% else %}
+                                                <div class="avatar-sm me-2 bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                                                    <span class="text-white font-weight-bold">{{ workflow.assigned_to.first_name|first|upper }}</span>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <span class="text-body fw-semibold">{{ workflow.assigned_to.get_full_name }}</span>
+                                                <small class="d-block text-muted">{{ workflow.assigned_to.get_role_display }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ workflow.get_status_color }}">{{ workflow.get_status_display }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ workflow.progress }}%;" 
+                                                 aria-valuenow="{{ workflow.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small class="text-muted">{{ workflow.progress }}%</small>
+                                    </td>
+                                    <td>
+                                        {% if workflow.due_date %}
+                                            {% if workflow.is_overdue %}
+                                                <span class="text-danger">{{ workflow.due_date|date:"Y-m-d" }}</span>
+                                            {% else %}
+                                                {{ workflow.due_date|date:"Y-m-d" }}
+                                            {% endif %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'workflow:detail' workflow.id %}" class="action-icon">
+                                            <i class="mdi mdi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'workflow:update' workflow.id %}" class="action-icon">
+                                            <i class="mdi mdi-pencil"></i>
+                                        </a>
+                                        <a href="#" class="action-icon" onclick="deleteWorkflow({{ workflow.id }})">
+                                            <i class="mdi mdi-delete"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">채용이 없습니다.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if is_paginated %}
+                    <div class="row">
+                        <div class="col-12">
+                            <nav>
+                                <ul class="pagination pagination-rounded justify-content-center mb-0">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">이전</a>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">다음</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Statistics -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="text-muted fw-normal mt-0" title="Number of Customers">진행중</h5>
+                            <h3 class="mt-3 mb-3">{{ stats.in_progress }}</h3>
+                            <p class="mb-0 text-muted">
+                                <span class="text-success me-2">
+                                    <i class="mdi mdi-arrow-up-bold"></i> {{ stats.in_progress_growth }}%
+                                </span>
+                                <span class="text-nowrap">지난 주 대비</span>
+                            </p>
+                        </div>
+                        <div class="avatar-sm">
+                            <span class="avatar-title bg-soft-warning rounded">
+                                <i class="mdi mdi-clock font-20 text-warning"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="text-muted fw-normal mt-0" title="Number of Orders">완료</h5>
+                            <h3 class="mt-3 mb-3">{{ stats.completed }}</h3>
+                            <p class="mb-0 text-muted">
+                                <span class="text-success me-2">
+                                    <i class="mdi mdi-arrow-up-bold"></i> {{ stats.completed_growth }}%
+                                </span>
+                                <span class="text-nowrap">지난 주 대비</span>
+                            </p>
+                        </div>
+                        <div class="avatar-sm">
+                            <span class="avatar-title bg-soft-success rounded">
+                                <i class="mdi mdi-check-circle font-20 text-success"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="text-muted fw-normal mt-0" title="Average Revenue">지연</h5>
+                            <h3 class="mt-3 mb-3">{{ stats.overdue }}</h3>
+                            <p class="mb-0 text-muted">
+                                <span class="text-danger me-2">
+                                    <i class="mdi mdi-arrow-down-bold"></i> {{ stats.overdue_growth }}%
+                                </span>
+                                <span class="text-nowrap">지난 주 대비</span>
+                            </p>
+                        </div>
+                        <div class="avatar-sm">
+                            <span class="avatar-title bg-soft-danger rounded">
+                                <i class="mdi mdi-alert font-20 text-danger"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="text-muted fw-normal mt-0" title="Growth">총 채용</h5>
+                            <h3 class="mt-3 mb-3">{{ stats.total }}</h3>
+                            <p class="mb-0 text-muted">
+                                <span class="text-success me-2">
+                                    <i class="mdi mdi-arrow-up-bold"></i> {{ stats.total_growth }}%
+                                </span>
+                                <span class="text-nowrap">지난 주 대비</span>
+                            </p>
+                        </div>
+                        <div class="avatar-sm">
+                            <span class="avatar-title bg-soft-info rounded">
+                                <i class="mdi mdi-chart-line font-20 text-info"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteWorkflow(workflowId) {
+    if (confirm('이 채용을 삭제하시겠습니까?')) {
+        fetch(`/workflow/${workflowId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('오류가 발생했습니다.');
+            }
+        });
+    }
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}사용자 삭제 - {{ user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"사용자 삭제" icon="mdi-account-remove" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow-sm border-danger">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="rounded-circle bg-danger d-flex align-items-center justify-content-center mx-auto mb-3" 
+                             style="width: 80px; height: 80px;">
+                            <i class="mdi mdi-alert text-white" style="font-size: 2rem;"></i>
+                        </div>
+                        <h4 class="mb-2 text-danger">사용자 삭제 확인</h4>
+                        <p class="text-muted">이 작업은 되돌릴 수 없습니다.</p>
+                    </div>
+
+                    <div class="alert alert-danger">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-alert-circle me-1"></i>주의사항
+                        </h6>
+                        <p class="mb-0">
+                            사용자 <strong>{{ user.get_full_name }}</strong>을(를) 삭제하시겠습니까?
+                        </p>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="mdi mdi-account me-1"></i>삭제될 사용자 정보
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>이름:</strong> {{ user.get_full_name }}</p>
+                                    <p class="mb-1"><strong>사용자명:</strong> {{ user.username }}</p>
+                                    <p class="mb-1"><strong>이메일:</strong> {{ user.email }}</p>
+                                    <p class="mb-1"><strong>역할:</strong> {{ user.get_role_display }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>소속 기관:</strong> {{ user.organization.name }}</p>
+                                    <p class="mb-1"><strong>부서:</strong> {{ user.department|default:"-" }}</p>
+                                    <p class="mb-1"><strong>직책:</strong> {{ user.position|default:"-" }}</p>
+                                    <p class="mb-1"><strong>가입일:</strong> {{ user.date_joined|date:'Y년 m월 d일' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-information me-1"></i>삭제 시 주의사항
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>사용자의 모든 데이터가 영구적으로 삭제됩니다.</li>
+                            <li>관련된 모든 채용, 후보자, 평가 데이터가 함께 삭제됩니다.</li>
+                            <li>이 작업은 되돌릴 수 없습니다.</li>
+                            <li>현재 로그인 중인 사용자는 삭제할 수 없습니다.</li>
+                        </ul>
+                    </div>
+
+                    {% if user == request.user %}
+                        <div class="alert alert-danger">
+                            <h6 class="alert-heading">
+                                <i class="mdi mdi-alert me-1"></i>삭제 불가
+                            </h6>
+                            <p class="mb-0">
+                                현재 로그인 중인 사용자는 삭제할 수 없습니다. 
+                                다른 관리자 계정으로 로그인하여 삭제를 진행해주세요.
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <hr class="my-4">
+
+                    <!-- 버튼 -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{% url 'accounts:user_detail' user.id %}" class="btn btn-outline-secondary">
+                                <i class="mdi mdi-arrow-left me-1"></i>취소
+                            </a>
+                            <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-info ms-2">
+                                <i class="mdi mdi-account-group me-1"></i>사용자 목록
+                            </a>
+                        </div>
+                        <div>
+                            {% if user != request.user %}
+                                <form method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('정말로 이 사용자를 삭제하시겠습니까?')">
+                                        <i class="mdi mdi-delete me-1"></i>삭제 확인
+                                    </button>
+                                </form>
+                            {% else %}
+                                <button type="button" class="btn btn-danger" disabled>
+                                    <i class="mdi mdi-delete me-1"></i>삭제 불가
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-1px);
+}
+
+.btn-danger:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.card.border-danger {
+    border-width: 2px;
+}
+</style>
+{% endblock %} 

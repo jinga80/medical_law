@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=title icon="mdi-file-document-edit" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- 기본 정보 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="mb-3">기본 정보</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">템플릿명 *</label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                        <div class="text-danger">{{ form.name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.is_default.id_for_label }}" class="form-label">기본 템플릿</label>
+                                    <div class="form-check">
+                                        {{ form.is_default }}
+                                        <label class="form-check-label" for="{{ form.is_default.id_for_label }}">
+                                            기본 템플릿으로 설정
+                                        </label>
+                                    </div>
+                                    {% if form.is_default.errors %}
+                                        <div class="text-danger">{{ form.is_default.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">설명</label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="text-danger">{{ form.description.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 병원 정보 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="mb-3">병원 정보 (기본값)</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.hospital_name.id_for_label }}" class="form-label">병원명</label>
+                                    {{ form.hospital_name }}
+                                    {% if form.hospital_name.errors %}
+                                        <div class="text-danger">{{ form.hospital_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.hospital_branch.id_for_label }}" class="form-label">지점명</label>
+                                    {{ form.hospital_branch }}
+                                    {% if form.hospital_branch.errors %}
+                                        <div class="text-danger">{{ form.hospital_branch.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.hospital_address.id_for_label }}" class="form-label">병원 주소</label>
+                                    {{ form.hospital_address }}
+                                    {% if form.hospital_address.errors %}
+                                        <div class="text-danger">{{ form.hospital_address.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.hospital_phone.id_for_label }}" class="form-label">병원 연락처</label>
+                                    {{ form.hospital_phone }}
+                                    {% if form.hospital_phone.errors %}
+                                        <div class="text-danger">{{ form.hospital_phone.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.hospital_contact_person.id_for_label }}" class="form-label">담당자명</label>
+                                    {{ form.hospital_contact_person }}
+                                    {% if form.hospital_contact_person.errors %}
+                                        <div class="text-danger">{{ form.hospital_contact_person.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 채용 정보 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="mb-3">채용 정보 (기본값)</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.position_title.id_for_label }}" class="form-label">채용 포지션 *</label>
+                                    {{ form.position_title }}
+                                    {% if form.position_title.errors %}
+                                        <div class="text-danger">{{ form.position_title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.department.id_for_label }}" class="form-label">부서 *</label>
+                                    {{ form.department }}
+                                    {% if form.department.errors %}
+                                        <div class="text-danger">{{ form.department.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.employment_type.id_for_label }}" class="form-label">고용 형태 *</label>
+                                    {{ form.employment_type }}
+                                    {% if form.employment_type.errors %}
+                                        <div class="text-danger">{{ form.employment_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.urgency_level.id_for_label }}" class="form-label">긴급도</label>
+                                    {{ form.urgency_level }}
+                                    {% if form.urgency_level.errors %}
+                                        <div class="text-danger">{{ form.urgency_level.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.salary_min.id_for_label }}" class="form-label">최소 급여 (만원)</label>
+                                    {{ form.salary_min }}
+                                    {% if form.salary_min.errors %}
+                                        <div class="text-danger">{{ form.salary_min.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.salary_max.id_for_label }}" class="form-label">최대 급여 (만원)</label>
+                                    {{ form.salary_max }}
+                                    {% if form.salary_max.errors %}
+                                        <div class="text-danger">{{ form.salary_max.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 요구사항 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="mb-3">요구사항 (기본값)</h5>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.required_experience.id_for_label }}" class="form-label">필수 경력 요구사항 *</label>
+                                    {{ form.required_experience }}
+                                    {% if form.required_experience.errors %}
+                                        <div class="text-danger">{{ form.required_experience.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.preferred_qualifications.id_for_label }}" class="form-label">우대사항</label>
+                                    {{ form.preferred_qualifications }}
+                                    {% if form.preferred_qualifications.errors %}
+                                        <div class="text-danger">{{ form.preferred_qualifications.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.job_description.id_for_label }}" class="form-label">업무 내용 *</label>
+                                    {{ form.job_description }}
+                                    {% if form.job_description.errors %}
+                                        <div class="text-danger">{{ form.job_description.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.working_hours.id_for_label }}" class="form-label">근무 시간</label>
+                                    {{ form.working_hours }}
+                                    {% if form.working_hours.errors %}
+                                        <div class="text-danger">{{ form.working_hours.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.working_location.id_for_label }}" class="form-label">근무 장소</label>
+                                    {{ form.working_location }}
+                                    {% if form.working_location.errors %}
+                                        <div class="text-danger">{{ form.working_location.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 추가 정보 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="mb-3">추가 정보 (기본값)</h5>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.special_requirements.id_for_label }}" class="form-label">특별 요청사항</label>
+                                    {{ form.special_requirements }}
+                                    {% if form.special_requirements.errors %}
+                                        <div class="text-danger">{{ form.special_requirements.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.expected_start_date.id_for_label }}" class="form-label">희망 입사일</label>
+                                    {{ form.expected_start_date }}
+                                    {% if form.expected_start_date.errors %}
+                                        <div class="text-danger">{{ form.expected_start_date.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.recruitment_period.id_for_label }}" class="form-label">채용 기간</label>
+                                    {{ form.recruitment_period }}
+                                    {% if form.recruitment_period.errors %}
+                                        <div class="text-danger">{{ form.recruitment_period.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-end">
+                            <a href="{% url 'workflow:template_list' %}" class="btn btn-secondary">취소</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if template %}수정 완료{% else %}템플릿 생성{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+</style>
+{% endblock %} 

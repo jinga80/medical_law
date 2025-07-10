@@ -1,0 +1,651 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if candidate %}후보자 수정{% else %}새 후보자 추가{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border-left: 4px solid #007bff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .form-section h5 {
+        color: #007bff;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-section h5 i {
+        margin-right: 8px;
+        font-size: 1.1em;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .invalid-feedback {
+        font-size: 0.875em;
+        margin-top: 5px;
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+        font-weight: bold;
+    }
+    
+    .file-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .file-upload-area:hover {
+        border-color: #007bff;
+        background: #e3f2fd;
+    }
+    
+    .progress-indicator {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #e9ecef;
+        z-index: 9999;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #007bff, #28a745);
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+    
+    .section-counter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        background: #007bff;
+        color: white;
+        border-radius: 50%;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+    
+    .form-floating {
+        position: relative;
+    }
+    
+    .form-floating > .form-control {
+        height: calc(3.5rem + 2px);
+        line-height: 1.25;
+    }
+    
+    .form-floating > label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        padding: 1rem 0.75rem;
+        pointer-events: none;
+        border: 1px solid transparent;
+        transform-origin: 0 0;
+        transition: opacity .1s ease-in-out,transform .1s ease-in-out;
+    }
+    
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        opacity: .65;
+        transform: scale(.85) translateY(-0.5rem) translateX(0.15rem);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 진행률 표시기 -->
+    <div class="progress-indicator">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <!-- 브레드크럼 -->
+    {% include 'includes/breadcrumbs.html' %}
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="mdi mdi-account-plus me-2"></i>
+                        {% if candidate %}후보자 정보 수정{% else %}새 후보자 등록{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" id="candidateForm" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- 채용 정보 섹션 -->
+                        <div class="form-section">
+                            <h5>
+                                <span class="section-counter">1</span>
+                                <i class="mdi mdi-briefcase"></i>채용 정보
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.position.id_for_label }}" class="form-label required-field">지원 직무</label>
+                                        {{ form.position }}
+                                        {% if form.position.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.position.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.branch.id_for_label }}" class="form-label required-field">지점</label>
+                                        {{ form.branch }}
+                                        {% if form.branch.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.branch.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.expected_salary.id_for_label }}" class="form-label">희망 급여 (만원)</label>
+                                        <div class="input-group">
+                                            {{ form.expected_salary }}
+                                            <span class="input-group-text">만원</span>
+                                        </div>
+                                        {% if form.expected_salary.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.expected_salary.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 기본 정보 섹션 -->
+                        <div class="form-section">
+                            <h5>
+                                <span class="section-counter">2</span>
+                                <i class="mdi mdi-account"></i>기본 정보
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.name.id_for_label }}" class="form-label required-field">이름</label>
+                                        {{ form.name }}
+                                        {% if form.name.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.name.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.phone.id_for_label }}" class="form-label required-field">전화번호</label>
+                                        {{ form.phone }}
+                                        {% if form.phone.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.phone.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.email.id_for_label }}" class="form-label">이메일</label>
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.birth_date.id_for_label }}" class="form-label">생년월일</label>
+                                        {{ form.birth_date }}
+                                        {% if form.birth_date.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.birth_date.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.gender.id_for_label }}" class="form-label">성별</label>
+                                        {{ form.gender }}
+                                        {% if form.gender.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.gender.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.available_start_date.id_for_label }}" class="form-label">입사 가능일</label>
+                                        {{ form.available_start_date }}
+                                        {% if form.available_start_date.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.available_start_date.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.address.id_for_label }}" class="form-label">주소</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.address.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- 학력 정보 섹션 -->
+                        <div class="form-section">
+                            <h5>
+                                <span class="section-counter">3</span>
+                                <i class="mdi mdi-school"></i>학력 정보
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.education_level.id_for_label }}" class="form-label required-field">최종학력</label>
+                                        {{ form.education_level }}
+                                        {% if form.education_level.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.education_level.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.graduation_year.id_for_label }}" class="form-label">졸업년도</label>
+                                        {{ form.graduation_year }}
+                                        {% if form.graduation_year.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.graduation_year.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.major.id_for_label }}" class="form-label">전공</label>
+                                        {{ form.major }}
+                                        {% if form.major.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.major.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.university.id_for_label }}" class="form-label">졸업학교</label>
+                                        {{ form.university }}
+                                        {% if form.university.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.university.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 경력 정보 섹션 -->
+                        <div class="form-section">
+                            <h5>
+                                <span class="section-counter">4</span>
+                                <i class="mdi mdi-briefcase-outline"></i>경력 정보
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.total_experience_years.id_for_label }}" class="form-label">총 경력(년)</label>
+                                        <div class="input-group">
+                                            {{ form.total_experience_years }}
+                                            <span class="input-group-text">년</span>
+                                        </div>
+                                        {% if form.total_experience_years.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.total_experience_years.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.current_company.id_for_label }}" class="form-label">현재 회사</label>
+                                        {{ form.current_company }}
+                                        {% if form.current_company.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.current_company.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.current_position.id_for_label }}" class="form-label">현재 직책</label>
+                                        {{ form.current_position }}
+                                        {% if form.current_position.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.current_position.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.relevant_experience.id_for_label }}" class="form-label required-field">관련 경력</label>
+                                {{ form.relevant_experience }}
+                                {% if form.relevant_experience.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.relevant_experience.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- 자격 및 스킬 섹션 -->
+                        <div class="form-section">
+                            <h5>
+                                <span class="section-counter">5</span>
+                                <i class="mdi mdi-certificate"></i>자격 및 스킬
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.licenses.id_for_label }}" class="form-label">보유 자격증</label>
+                                        {{ form.licenses }}
+                                        {% if form.licenses.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.licenses.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.skills.id_for_label }}" class="form-label">보유 스킬</label>
+                                        {{ form.skills }}
+                                        {% if form.skills.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.skills.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.languages.id_for_label }}" class="form-label">언어 능력</label>
+                                        {{ form.languages }}
+                                        {% if form.languages.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.languages.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 파일 첨부 섹션 -->
+                        <div class="form-section">
+                            <h5>
+                                <span class="section-counter">6</span>
+                                <i class="mdi mdi-file-upload"></i>파일 첨부
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.resume_file.id_for_label }}" class="form-label required-field">이력서 파일</label>
+                                        <div class="file-upload-area">
+                                            {{ form.resume_file }}
+                                            <p class="text-muted small mt-2">PDF, DOC, DOCX 파일만 가능</p>
+                                        </div>
+                                        {% if form.resume_file.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.resume_file.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.portfolio_file.id_for_label }}" class="form-label">포트폴리오 파일</label>
+                                        <div class="file-upload-area">
+                                            {{ form.portfolio_file }}
+                                            <p class="text-muted small mt-2">선택사항</p>
+                                        </div>
+                                        {% if form.portfolio_file.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.portfolio_file.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.cover_letter.id_for_label }}" class="form-label">자기소개서</label>
+                                        <div class="file-upload-area">
+                                            {{ form.cover_letter }}
+                                            <p class="text-muted small mt-2">선택사항</p>
+                                        </div>
+                                        {% if form.cover_letter.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.cover_letter.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 추천 정보 섹션 -->
+                        <div class="form-section">
+                            <h5>
+                                <span class="section-counter">7</span>
+                                <i class="mdi mdi-star"></i>추천 정보
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.recommendation_reason.id_for_label }}" class="form-label required-field">추천 사유</label>
+                                {{ form.recommendation_reason }}
+                                {% if form.recommendation_reason.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.recommendation_reason.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- 메모 섹션 -->
+                        <div class="form-section">
+                            <h5>
+                                <span class="section-counter">8</span>
+                                <i class="mdi mdi-note-text"></i>메모
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.internal_notes.id_for_label }}" class="form-label">내부 메모</label>
+                                        {{ form.internal_notes }}
+                                        {% if form.internal_notes.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.internal_notes.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.candidate_notes.id_for_label }}" class="form-label">후보자 메모</label>
+                                        {{ form.candidate_notes }}
+                                        {% if form.candidate_notes.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.candidate_notes.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 버튼 섹션 -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-4 border-top">
+                            <div>
+                                <a href="{% url 'candidates:list' %}" class="btn btn-secondary">
+                                    <i class="mdi mdi-arrow-left me-1"></i>목록으로
+                                </a>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-outline-primary me-2" id="saveDraft">
+                                    <i class="mdi mdi-content-save me-1"></i>임시저장
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-submit">
+                                    <i class="mdi mdi-check me-1"></i>
+                                    {% if candidate %}수정 완료{% else %}등록 완료{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 진행률 표시기
+function updateProgress() {
+    const form = document.getElementById('candidateForm');
+    const sections = form.querySelectorAll('.form-section');
+    const progressBar = document.getElementById('progressBar');
+    
+    let filledSections = 0;
+    sections.forEach(section => {
+        const inputs = section.querySelectorAll('input, select, textarea');
+        let hasValue = false;
+        
+        inputs.forEach(input => {
+            if (input.value && input.value.trim() !== '') {
+                hasValue = true;
+            }
+        });
+        
+        if (hasValue) filledSections++;
+    });
+    
+    const progress = (filledSections / sections.length) * 100;
+    progressBar.style.width = progress + '%';
+}
+
+// 폼 유효성 검사
+function validateForm() {
+    const form = document.getElementById('candidateForm');
+    const requiredFields = form.querySelectorAll('.required-field');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        const input = document.querySelector(`[for="${field.getAttribute('for')}"]`);
+        if (input && !input.value.trim()) {
+            isValid = false;
+            input.classList.add('is-invalid');
+        } else if (input) {
+            input.classList.remove('is-invalid');
+        }
+    });
+    
+    return isValid;
+}
+
+// 이벤트 리스너
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('candidateForm');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    // 진행률 업데이트
+    inputs.forEach(input => {
+        input.addEventListener('input', updateProgress);
+        input.addEventListener('change', updateProgress);
+    });
+    
+    // 폼 제출 시 유효성 검사
+    form.addEventListener('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            alert('필수 항목을 모두 입력해주세요.');
+        }
+    });
+    
+    // 임시저장 기능
+    document.getElementById('saveDraft').addEventListener('click', function() {
+        // 임시저장 로직 (실제 구현 시 localStorage 또는 서버 저장)
+        alert('임시저장되었습니다.');
+    });
+    
+    // 초기 진행률 설정
+    updateProgress();
+});
+
+// 파일 업로드 미리보기
+document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const fileArea = this.closest('.file-upload-area');
+            const info = fileArea.querySelector('p');
+            info.textContent = `선택된 파일: ${file.name}`;
+            info.className = 'text-success small mt-2';
+        }
+    });
+});
+</script>
+{% endblock %} 

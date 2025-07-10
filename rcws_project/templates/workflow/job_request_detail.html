@@ -1,0 +1,486 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}채용 요청 상세{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"채용 요청 상세" icon="mdi-file-document" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title">{{ job_request.position_title }}</h5>
+                        <div>
+                            {% if job_request.is_editable_by_user %}
+                                <a href="{% url 'workflow:job_request_edit' job_request.id %}" class="btn btn-outline-primary">수정</a>
+                                <a href="{% url 'workflow:job_request_submit' job_request.id %}" class="btn btn-success">제출</a>
+                            {% endif %}
+                            
+                            {% if not job_request.is_locked %}
+                                <a href="{% url 'workflow:job_request_lock' job_request.id %}" class="btn btn-warning">
+                                    <i class="fas fa-lock"></i> 요청 잠금
+                                </a>
+                            {% else %}
+                                {% if request.user.is_staff or request.user.is_superuser %}
+                                    <a href="{% url 'workflow:job_request_unlock' job_request.id %}" class="btn btn-info">
+                                        <i class="fas fa-unlock"></i> 잠금 해제
+                                    </a>
+                                {% endif %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-lock"></i> 잠금됨
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- 확인 및 워크플로우 진행 섹션 -->
+                    {% if job_request.status == 'submitted' or job_request.status == 'accepted' or job_request.status == 'in_progress' or job_request.reviewed_by_headhunting or job_request.reviewed_by_hospital %}
+                    <div class="alert alert-info" role="alert">
+                        <h6><i class="fas fa-info-circle"></i> 확인 및 진행 상태</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>채용담당 확인:</strong>
+                                {% if job_request.reviewed_by_headhunting %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check"></i> 확인 완료
+                                    </span>
+                                    <small class="d-block text-muted">
+                                        {{ job_request.reviewed_by_headhunting.get_full_name }} | 
+                                        {{ job_request.reviewed_at|date:"Y-m-d H:i" }}
+                                    </small>
+                                    {% if job_request.review_notes %}
+                                    <small class="d-block text-muted mt-1">
+                                        <strong>메모:</strong> {{ job_request.review_notes }}
+                                    </small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-clock"></i> 대기중
+                                    </span>
+                                    {% if can_review_headhunting %}
+                                        <button class="btn btn-sm btn-outline-primary ms-2" 
+                                                onclick="showReviewModal('headhunting')">
+                                            <i class="fas fa-eye"></i> 확인하기
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>병원 담당 확인:</strong>
+                                {% if job_request.reviewed_by_hospital %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check"></i> 확인 완료
+                                    </span>
+                                    <small class="d-block text-muted">
+                                        {{ job_request.reviewed_by_hospital.get_full_name }} | 
+                                        {{ job_request.hospital_reviewed_at|date:"Y-m-d H:i" }}
+                                    </small>
+                                    {% if job_request.hospital_review_notes %}
+                                    <small class="d-block text-muted mt-1">
+                                        <strong>메모:</strong> {{ job_request.hospital_review_notes }}
+                                    </small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-clock"></i> 대기중
+                                    </span>
+                                    {% if can_review_hospital %}
+                                        <button class="btn btn-sm btn-outline-primary ms-2" 
+                                                onclick="showReviewModal('hospital')">
+                                            <i class="fas fa-eye"></i> 확인하기
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- 전체 확인 상태 요약 -->
+                        <div class="mt-3 pt-3 border-top">
+                            <strong>전체 확인 상태:</strong>
+                            <span class="badge bg-{{ job_request.get_review_status_color }} ms-2">
+                                {{ job_request.get_review_status_display }}
+                            </span>
+                        </div>
+                        
+                        <!-- 워크플로우 진행 버튼 -->
+                        {% if can_advance_to_workflow %}
+                        <div class="mt-3">
+                            <button class="btn btn-success" onclick="advanceToWorkflow()">
+                                <i class="fas fa-play"></i> 워크플로우로 진행
+                            </button>
+                            <small class="d-block text-muted mt-1">
+                                채용 프로세스를 시작하여 지원자 모집 및 면접 진행을 시작합니다.
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- 워크플로우 진행 상황 -->
+                    {% if workflow_progress %}
+                    <div class="alert alert-success" role="alert">
+                        <h6><i class="fas fa-chart-line"></i> 워크플로우 진행 상황</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ workflow_progress.overall_progress }}%"
+                                 aria-valuenow="{{ workflow_progress.overall_progress }}" 
+                                 aria-valuemin="0" aria-valuemax="100">
+                                {{ workflow_progress.overall_progress }}%
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            현재 단계: {{ workflow_progress.get_current_step_display }} | 
+                            목표 완료일: {{ workflow_progress.target_completion_date|date:"Y-m-d" }}
+                        </small>
+                        <a href="{% url 'workflow:detail' workflow_progress.workflow.id %}" 
+                           class="btn btn-sm btn-outline-success ms-2">
+                            <i class="fas fa-external-link-alt"></i> 워크플로우 보기
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- 잠금 상태 알림 -->
+                    {% if job_request.is_locked %}
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>요청이 잠겨있습니다.</strong> 
+                        {% if job_request.locked_by %}
+                            {{ job_request.locked_by.get_full_name }}님이 
+                            {{ job_request.locked_at|date:"Y-m-d H:i" }}에 잠금 처리했습니다.
+                        {% endif %}
+                        잠금된 요청은 수정할 수 없지만 추가 요청사항은 계속 등록할 수 있습니다.
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>기본 정보</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>요청 ID:</strong></td>
+                                    <td>{{ job_request.request_id }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>병원명:</strong></td>
+                                    <td>{{ job_request.hospital_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>지점명:</strong></td>
+                                    <td>{{ job_request.hospital_branch }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>담당자:</strong></td>
+                                    <td>{{ job_request.hospital_contact_person }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>연락처:</strong></td>
+                                    <td>{{ job_request.hospital_phone }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>부서:</strong></td>
+                                    <td>{{ job_request.department }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>고용 형태:</strong></td>
+                                    <td>{{ job_request.get_employment_type_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>상태:</strong></td>
+                                    <td>
+                                        <span class="badge bg-{{ job_request.get_status_color }}">
+                                            {{ job_request.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>긴급도:</strong></td>
+                                    <td>
+                                        <span class="badge bg-{{ job_request.get_urgency_level_color }}">
+                                            {{ job_request.get_urgency_level_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>급여 및 일정 정보</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>최소 급여:</strong></td>
+                                    <td>{{ job_request.salary_min|default:"미정" }}만원</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>최대 급여:</strong></td>
+                                    <td>{{ job_request.salary_max|default:"미정" }}만원</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>희망 입사일:</strong></td>
+                                    <td>{{ job_request.expected_start_date|default:"미정" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>채용 기간:</strong></td>
+                                    <td>{{ job_request.recruitment_period|default:"미정" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>근무 시간:</strong></td>
+                                    <td>{{ job_request.working_hours|default:"미정" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>근무 장소:</strong></td>
+                                    <td>{{ job_request.working_location|default:"미정" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>요청일:</strong></td>
+                                    <td>{{ job_request.created_at|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                                {% if job_request.submitted_at %}
+                                <tr>
+                                    <td><strong>제출일:</strong></td>
+                                    <td>{{ job_request.submitted_at|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6>병원 주소</h6>
+                            <p>{{ job_request.hospital_address|linebreaks }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6>업무 내용</h6>
+                            <p>{{ job_request.job_description|linebreaks }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6>필수 경력 요구사항</h6>
+                            <p>{{ job_request.required_experience|linebreaks }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if job_request.preferred_qualifications %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6>우대사항</h6>
+                            <p>{{ job_request.preferred_qualifications|linebreaks }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if job_request.special_requirements %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6>특별 요청사항</h6>
+                            <p>{{ job_request.special_requirements|linebreaks }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 추가 요청사항 섹션 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-plus-circle"></i> 추가 요청사항
+                        <span class="badge bg-primary ms-2">{{ job_request.get_additional_requests_count }}</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if job_request.additional_requests %}
+                        <div class="additional-requests-list">
+                            {% for request in job_request.additional_requests %}
+                            <div class="additional-request-item border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <p class="mb-1">{{ request.text|linebreaks }}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-user"></i> {{ request.created_by }} | 
+                                            <i class="fas fa-clock"></i> {{ request.created_at|slice:":19"|date:"Y-m-d H:i" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">등록된 추가 요청사항이 없습니다.</p>
+                    {% endif %}
+                    
+                    <!-- 추가 요청사항 입력 폼 -->
+                    {% if not job_request.is_locked or job_request.status == 'draft' or job_request.status == 'submitted' %}
+                    <div class="mt-4">
+                        <h6>새로운 추가 요청사항</h6>
+                        <form id="additionalRequestForm">
+                            <div class="mb-3">
+                                <textarea class="form-control" id="additionalRequestText" rows="3" 
+                                          placeholder="추가로 요청하고 싶은 사항을 입력해주세요..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> 추가 요청사항 등록
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 확인 모달 -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reviewModalLabel">채용 요청 확인</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reviewForm">
+                    <div class="mb-3">
+                        <label for="reviewNotes" class="form-label">검토 메모 (선택사항)</label>
+                        <textarea class="form-control" id="reviewNotes" rows="3" 
+                                  placeholder="검토 시 참고사항이나 메모를 입력해주세요..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="submitReview()">확인 완료</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentReviewType = '';
+
+document.getElementById('additionalRequestForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const text = document.getElementById('additionalRequestText').value.trim();
+    if (!text) {
+        alert('추가 요청사항 내용을 입력해주세요.');
+        return;
+    }
+    
+    fetch(`{% url 'workflow:job_request_add_additional_request_ajax' job_request.id %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            text: text
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('오류: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('오류가 발생했습니다.');
+    });
+});
+
+function showReviewModal(type) {
+    currentReviewType = type;
+    const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+    const modalTitle = document.getElementById('reviewModalLabel');
+    
+    if (type === 'headhunting') {
+        modalTitle.textContent = '채용담당 회사 확인';
+    } else if (type === 'hospital') {
+        modalTitle.textContent = '병원 담당자 확인';
+    }
+    
+    modal.show();
+}
+
+function submitReview() {
+    const notes = document.getElementById('reviewNotes').value.trim();
+    const url = currentReviewType === 'headhunting' 
+        ? `{% url 'workflow:job_request_review_headhunting' job_request.id %}`
+        : `{% url 'workflow:job_request_review_hospital' job_request.id %}`;
+    
+    const formData = new FormData();
+    formData.append('notes', notes);
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('오류: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('오류가 발생했습니다.');
+    });
+}
+
+function advanceToWorkflow() {
+    if (!confirm('이 채용 요청을 워크플로우로 진행하시겠습니까?\n진행하면 채용 프로세스가 시작됩니다.')) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    fetch(`{% url 'workflow:job_request_advance_to_workflow' job_request.id %}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+            } else {
+                location.reload();
+            }
+        } else {
+            alert('오류: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('오류가 발생했습니다.');
+    });
+}
+</script>
+{% endblock %} 

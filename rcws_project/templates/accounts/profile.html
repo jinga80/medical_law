@@ -1,0 +1,223 @@
+@{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}프로필 - {{ user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title="내 프로필" icon="mdi-account" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i>프로필 수정
+                </a>
+                <a href="{% url 'accounts:change_password' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-key me-1"></i>비밀번호 변경
+                </a>
+                <a href="{% url 'accounts:my_activity_list' %}" class="btn btn-outline-info">
+                    <i class="fas fa-history me-1"></i>활동 내역
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-4 col-lg-5">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" class="rounded-circle avatar-lg img-thumbnail" alt="프로필 이미지">
+                        {% else %}
+                            <div class="avatar-lg mx-auto bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                                <span class="text-white font-weight-bold" style="font-size: 2rem;">{{ user.first_name|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <h4 class="mb-1">{{ user.get_full_name }}</h4>
+                    <p class="text-muted">{{ user.get_role_display }}</p>
+
+                    <div class="text-start mt-3">
+                        <h4 class="font-13 text-uppercase">소속 정보</h4>
+                        <p class="text-muted font-13 mb-3">
+                            <strong>기관:</strong> {{ user.organization.name }}<br>
+                            <strong>부서:</strong> {{ user.department|default:"-" }}<br>
+                            <strong>직책:</strong> {{ user.position|default:"-" }}<br>
+                            <strong>사원번호:</strong> {{ user.employee_id|default:"-" }}
+                        </p>
+
+                        <h4 class="font-13 text-uppercase">연락처</h4>
+                        <p class="text-muted font-13 mb-3">
+                            <strong>이메일:</strong> {{ user.email }}<br>
+                            <strong>전화번호:</strong> {{ user.phone|default:"-" }}
+                        </p>
+
+                        <h4 class="font-13 text-uppercase">계정 정보</h4>
+                        <p class="text-muted font-13 mb-0">
+                            <strong>가입일:</strong> {{ user.date_joined|date:"Y-m-d" }}<br>
+                            <strong>마지막 활동:</strong> {{ user.last_activity|date:"Y-m-d H:i"|default:"-" }}
+                        </p>
+                    </div>
+                    
+                    <!-- 로그아웃 버튼 추가 -->
+                    <div class="mt-4">
+                                        <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="mdi mdi-logout me-2"></i>로그아웃
+                    </button>
+                </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8 col-lg-7">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-pills nav-fill navtab-bg">
+                        <li class="nav-item">
+                            <a href="#profile" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+                                프로필 수정
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#password" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                                비밀번호 변경
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#activity" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                                활동 내역
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane show active" id="profile">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="first_name" class="form-label">이름</label>
+                                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="last_name" class="form-label">성</label>
+                                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">이메일</label>
+                                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="phone" class="form-label">전화번호</label>
+                                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.phone }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="department" class="form-label">부서</label>
+                                            <input type="text" class="form-control" id="department" name="department" value="{{ user.department }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="position" class="form-label">직책</label>
+                                            <input type="text" class="form-control" id="position" name="position" value="{{ user.position }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="profile_image" class="form-label">프로필 이미지</label>
+                                    <input type="file" class="form-control" id="profile_image" name="profile_image" accept="image/*">
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">프로필 업데이트</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane" id="password">
+                            <form method="post" action="{% url 'accounts:change_password' %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="old_password" class="form-label">현재 비밀번호</label>
+                                    <input type="password" class="form-control" id="old_password" name="old_password" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="new_password" class="form-label">새 비밀번호</label>
+                                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">새 비밀번호 확인</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">비밀번호 변경</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane" id="activity">
+                            <div class="table-responsive">
+                                <table class="table table-centered table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>활동</th>
+                                            <th>설명</th>
+                                            <th>시간</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for activity in user.activities.all|slice:":10" %}
+                                        <tr>
+                                            <td>{{ activity.get_activity_type_display }}</td>
+                                            <td>{{ activity.description }}</td>
+                                            <td>{{ activity.created_at|date:"Y-m-d H:i" }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="3" class="text-center">활동 내역이 없습니다.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,443 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}사용자 관리 사용법 - RCWS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-title-box bg-gradient-success text-white rounded-3 shadow-sm" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <div class="page-title-left">
+                        <h2 class="page-title mb-2 fw-bold" style="font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="mdi mdi-account-group me-3"></i>사용자 관리 사용법
+                        </h2>
+                        <ol class="breadcrumb m-0" style="font-size: 0.95rem;">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-home me-1"></i>홈
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'help:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-help-circle me-1"></i>사용 설명서
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">
+                                <i class="mdi mdi-chevron-right mx-2"></i>사용자 관리
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- 사용자 관리 개요 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-information me-2"></i>사용자 관리란?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        사용자 관리는 RCWS 시스템에 접근할 수 있는 사용자들을 관리하는 기능입니다. 
+                        새로운 사용자 추가, 권한 설정, 계정 관리 등을 담당합니다.
+                    </p>
+                    <div class="alert alert-success">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-lightbulb me-1"></i>사용자 관리의 주요 기능
+                        </h6>
+                        <ul class="mb-0">
+                            <li>새 사용자 계정 생성</li>
+                            <li>사용자 정보 수정 및 관리</li>
+                            <li>권한 및 역할 설정</li>
+                            <li>계정 활성화/비활성화</li>
+                            <li>비밀번호 관리</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사용자 생성 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-account-plus me-2"></i>1. 새 사용자 생성하기
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">생성 방법</h6>
+                            <ol class="small text-muted">
+                                <li>사용자 목록 페이지에서 "새 사용자 추가" 버튼 클릭</li>
+                                <li>기본 정보 입력 (사용자명, 이메일, 이름)</li>
+                                <li>비밀번호 설정</li>
+                                <li>권한 및 역할 선택</li>
+                                <li>부서 및 직책 정보 입력</li>
+                                <li>"저장" 버튼 클릭</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-info mb-3">필수 입력 항목</h6>
+                            <ul class="small text-muted">
+                                <li><strong>사용자명</strong> - 로그인에 사용할 고유 ID</li>
+                                <li><strong>이메일</strong> - 시스템 알림 수신용</li>
+                                <li><strong>이름</strong> - 실제 사용자 이름</li>
+                                <li><strong>비밀번호</strong> - 보안을 위한 강력한 비밀번호</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-tip me-1"></i>사용자 생성 시 주의사항
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>사용자명은 중복이 불가능하며 영문, 숫자, 언더스코어만 사용 가능</li>
+                            <li>비밀번호는 8자 이상, 영문/숫자/특수문자 조합 권장</li>
+                            <li>이메일 주소는 실제 사용 가능한 주소여야 함</li>
+                            <li>권한 설정은 신중하게 결정하여 필요한 최소 권한만 부여</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사용자 권한 관리 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-shield-account me-2"></i>2. 사용자 권한 관리
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-warning mb-3">권한 종류</h6>
+                            <ul class="small text-muted">
+                                <li><strong>관리자</strong> - 모든 기능 접근 가능</li>
+                                <li><strong>HR 매니저</strong> - 후보자 관리 및 평가</li>
+                                <li><strong>평가자</strong> - 후보자 평가만 가능</li>
+                                <li><strong>일반 사용자</strong> - 조회만 가능</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-info mb-3">권한 변경 방법</h6>
+                            <ol class="small text-muted">
+                                <li>사용자 상세 페이지에서 "편집" 버튼 클릭</li>
+                                <li>권한 섹션에서 새로운 권한 선택</li>
+                                <li>변경 사유 입력 (선택사항)</li>
+                                <li>"저장" 버튼 클릭</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-alert me-1"></i>권한 관리 주의사항
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>관리자 권한은 신중하게 부여해야 합니다</li>
+                            <li>권한 변경 시 사용자에게 사전 통지하는 것이 좋습니다</li>
+                            <li>정기적으로 권한을 검토하여 불필요한 권한은 제거하세요</li>
+                            <li>퇴사자나 휴직자의 권한은 즉시 비활성화하세요</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사용자 정보 관리 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-account-edit me-2"></i>3. 사용자 정보 관리
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-info mb-3">수정 가능한 정보</h6>
+                            <ul class="small text-muted">
+                                <li>이름 및 연락처 정보</li>
+                                <li>부서 및 직책</li>
+                                <li>프로필 이미지</li>
+                                <li>권한 및 역할</li>
+                                <li>계정 활성화 상태</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">수정 방법</h6>
+                            <ol class="small text-muted">
+                                <li>사용자 목록에서 수정할 사용자 선택</li>
+                                <li>상세 페이지에서 "편집" 버튼 클릭</li>
+                                <li>수정할 정보 변경</li>
+                                <li>변경사항 저장</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-information me-1"></i>정보 관리 팁
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>사용자 정보 변경 시 해당 사용자에게 알림을 보내는 것이 좋습니다</li>
+                            <li>중요한 정보 변경은 로그에 기록되므로 추적이 가능합니다</li>
+                            <li>프로필 이미지는 JPG, PNG 형식만 업로드 가능합니다</li>
+                            <li>정기적으로 사용자 정보를 업데이트하여 최신 상태를 유지하세요</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 비밀번호 관리 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-lock-reset me-2"></i>4. 비밀번호 관리
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-secondary mb-3">비밀번호 재설정</h6>
+                            <ol class="small text-muted">
+                                <li>사용자 상세 페이지에서 "비밀번호 변경" 버튼 클릭</li>
+                                <li>새 비밀번호 입력</li>
+                                <li>비밀번호 확인 입력</li>
+                                <li>"변경" 버튼 클릭</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-warning mb-3">보안 정책</h6>
+                            <ul class="small text-muted">
+                                <li>최소 8자 이상</li>
+                                <li>영문, 숫자, 특수문자 조합</li>
+                                <li>이전 비밀번호와 동일하지 않음</li>
+                                <li>90일마다 변경 권장</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-security me-1"></i>보안 주의사항
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>비밀번호는 안전한 방법으로 사용자에게 전달하세요</li>
+                            <li>초기 비밀번호는 반드시 변경하도록 안내하세요</li>
+                            <li>의심스러운 로그인 시도 시 즉시 비밀번호를 재설정하세요</li>
+                            <li>정기적으로 보안 정책을 점검하고 업데이트하세요</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사용자 삭제 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-account-remove me-2"></i>5. 사용자 삭제
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-alert me-1"></i>주의사항
+                        </h6>
+                        <p class="mb-0">
+                            사용자 삭제는 되돌릴 수 없는 작업입니다. 신중하게 결정해주세요.
+                        </p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-danger mb-3">삭제 방법</h6>
+                            <ol class="small text-muted">
+                                <li>사용자 상세 페이지에서 "삭제" 버튼 클릭</li>
+                                <li>삭제 확인 페이지에서 사용자 정보 재확인</li>
+                                <li>삭제 사유 입력</li>
+                                <li>"삭제 확인" 버튼 클릭</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-warning mb-3">삭제 시 주의사항</h6>
+                            <ul class="small text-muted">
+                                <li>삭제된 사용자는 복구할 수 없습니다</li>
+                                <li>사용자가 작성한 모든 데이터가 함께 삭제됩니다</li>
+                                <li>진행 중인 작업이 있다면 완료 후 삭제하세요</li>
+                                <li>삭제 전 데이터 백업을 권장합니다</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 팁과 모범 사례 -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-lightbulb me-2"></i>팁과 모범 사례
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-account-check me-1"></i>정기적인 검토
+                                </h6>
+                                <p class="small mb-0">
+                                    월 1회 사용자 목록을 검토하여 불필요한 계정을 정리하세요.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-shield-check me-1"></i>최소 권한 원칙
+                                </h6>
+                                <p class="small mb-0">
+                                    사용자에게 필요한 최소한의 권한만 부여하여 보안을 강화하세요.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-email-alert me-1"></i>변경 알림
+                                </h6>
+                                <p class="small mb-0">
+                                    중요한 정보 변경 시 해당 사용자에게 이메일로 알림을 보내세요.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-backup-restore me-1"></i>데이터 백업
+                                </h6>
+                                <p class="small mb-0">
+                                    사용자 삭제 전 중요한 데이터는 반드시 백업하세요.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사이드바 -->
+        <div class="col-lg-4">
+            <!-- 빠른 링크 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-link me-2"></i>빠른 링크
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-success btn-sm">
+                            <i class="mdi mdi-account-group me-2"></i>사용자 목록
+                        </a>
+                        <a href="{% url 'accounts:user_create' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="mdi mdi-account-plus me-2"></i>새 사용자 생성
+                        </a>
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-info btn-sm">
+                            <i class="mdi mdi-account me-2"></i>내 프로필
+                        </a>
+                        <a href="{% url 'accounts:change_password' %}" class="btn btn-outline-warning btn-sm">
+                            <i class="mdi mdi-lock me-2"></i>비밀번호 변경
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 권한별 가이드 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-shield me-2"></i>권한별 가이드
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="badge bg-danger me-2">관리자</span>
+                        <small class="text-muted">모든 기능 접근 가능</small>
+                    </div>
+                    <div class="mb-3">
+                        <span class="badge bg-warning me-2">HR 매니저</span>
+                        <small class="text-muted">후보자 관리 및 평가</small>
+                    </div>
+                    <div class="mb-3">
+                        <span class="badge bg-info me-2">평가자</span>
+                        <small class="text-muted">후보자 평가만 가능</small>
+                    </div>
+                    <div class="mb-3">
+                        <span class="badge bg-secondary me-2">일반 사용자</span>
+                        <small class="text-muted">조회만 가능</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 문제 해결 -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-wrench me-2"></i>문제 해결
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="mb-2">로그인이 안 돼요</h6>
+                        <p class="small text-muted mb-0">
+                            사용자명과 비밀번호를 확인하고, 계정이 활성화되어 있는지 확인하세요.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="mb-2">권한이 부족해요</h6>
+                        <p class="small text-muted mb-0">
+                            관리자에게 필요한 권한을 요청하세요.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="mb-2">비밀번호를 잊어버렸어요</h6>
+                        <p class="small text-muted mb-0">
+                            관리자에게 문의하여 비밀번호를 재설정하세요.
+                        </p>
+                    </div>
+                    <a href="{% url 'help:contact' %}" class="btn btn-outline-danger btn-sm w-100">
+                        <i class="mdi mdi-help-circle me-1"></i>추가 도움 요청
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.btn-outline-success:hover,
+.btn-outline-primary:hover,
+.btn-outline-info:hover,
+.btn-outline-warning:hover,
+.btn-outline-danger:hover {
+    transform: translateY(-1px);
+}
+
+.alert-light {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,370 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}대시보드 사용법 - RCWS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-title-box bg-gradient-primary text-white rounded-3 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <div class="page-title-left">
+                        <h2 class="page-title mb-2 fw-bold" style="font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="mdi mdi-view-dashboard me-3"></i>대시보드 사용법
+                        </h2>
+                        <ol class="breadcrumb m-0" style="font-size: 0.95rem;">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-home me-1"></i>홈
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'help:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-help-circle me-1"></i>사용 설명서
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">
+                                <i class="mdi mdi-chevron-right mx-2"></i>대시보드
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- 대시보드 개요 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-information me-2"></i>대시보드란?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        대시보드는 RCWS 시스템의 메인 페이지로, 채용 프로세스의 전체 현황을 한눈에 파악할 수 있는 핵심 화면입니다.
+                    </p>
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-lightbulb me-1"></i>대시보드의 주요 기능
+                        </h6>
+                        <ul class="mb-0">
+                            <li>실시간 채용 현황 통계</li>
+                            <li>최근 활동 내역</li>
+                            <li>빠른 액세스 메뉴</li>
+                            <li>시스템 알림</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 대시보드 구성 요소 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-view-grid me-2"></i>대시보드 구성 요소
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-primary">
+                                    <i class="mdi mdi-chart-pie me-2"></i>통계 카드
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    상단에 위치한 4개의 카드로 주요 통계를 표시합니다.
+                                </p>
+                                <ul class="small text-muted">
+                                    <li>총 후보자 수</li>
+                                    <li>진행 중인 채용</li>
+                                    <li>완료된 채용</li>
+                                    <li>평가 대기</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-success">
+                                    <i class="mdi mdi-clock-outline me-2"></i>최근 활동
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    시스템에서 발생한 최근 활동들을 시간순으로 표시합니다.
+                                </p>
+                                <ul class="small text-muted">
+                                    <li>새 후보자 등록</li>
+                                    <li>평가 완료</li>
+                                    <li>상태 변경</li>
+                                    <li>사용자 로그인</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-warning">
+                                    <i class="mdi mdi-bell-outline me-2"></i>알림 섹션
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    중요한 알림과 메시지를 표시합니다.
+                                </p>
+                                <ul class="small text-muted">
+                                    <li>평가 대기 알림</li>
+                                    <li>시스템 공지사항</li>
+                                    <li>업데이트 정보</li>
+                                    <li>긴급 메시지</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-info">
+                                    <i class="mdi mdi-account-group me-2"></i>빠른 액세스
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    자주 사용하는 기능에 빠르게 접근할 수 있습니다.
+                                </p>
+                                <ul class="small text-muted">
+                                    <li>후보자 등록</li>
+                                    <li>사용자 관리</li>
+                                    <li>보고서 생성</li>
+                                    <li>설정 변경</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사용 방법 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-play-circle me-2"></i>사용 방법
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">
+                                <i class="mdi mdi-numeric-1-circle me-2"></i>1단계: 로그인
+                            </h6>
+                            <ol class="small text-muted">
+                                <li>브라우저에서 RCWS 시스템에 접속</li>
+                                <li>사용자명과 비밀번호 입력</li>
+                                <li>로그인 버튼 클릭</li>
+                                <li>자동으로 대시보드로 이동</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">
+                                <i class="mdi mdi-numeric-2-circle me-2"></i>2단계: 현황 확인
+                            </h6>
+                            <ol class="small text-muted">
+                                <li>상단 통계 카드 확인</li>
+                                <li>최근 활동 내역 검토</li>
+                                <li>알림 메시지 확인</li>
+                                <li>전체적인 현황 파악</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-warning mb-3">
+                                <i class="mdi mdi-numeric-3-circle me-2"></i>3단계: 작업 수행
+                            </h6>
+                            <ol class="small text-muted">
+                                <li>빠른 액세스 버튼 활용</li>
+                                <li>상단 메뉴를 통한 이동</li>
+                                <li>필요한 기능 선택</li>
+                                <li>작업 완료 후 대시보드로 복귀</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-info mb-3">
+                                <i class="mdi mdi-numeric-4-circle me-2"></i>4단계: 모니터링
+                            </h6>
+                            <ol class="small text-muted">
+                                <li>정기적으로 대시보드 확인</li>
+                                <li>새로운 알림 체크</li>
+                                <li>통계 변화 추적</li>
+                                <li>시스템 상태 모니터링</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 팁과 트릭 -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-lightbulb me-2"></i>팁과 트릭
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-refresh me-1"></i>새로고침 활용
+                                </h6>
+                                <p class="small mb-0">
+                                    대시보드를 새로고침하면 최신 데이터를 확인할 수 있습니다.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-bookmark me-1"></i>즐겨찾기 설정
+                                </h6>
+                                <p class="small mb-0">
+                                    대시보드 URL을 브라우저 즐겨찾기에 추가하면 빠른 접근이 가능합니다.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-bell me-1"></i>알림 설정
+                                </h6>
+                                <p class="small mb-0">
+                                    브라우저 알림을 허용하면 중요한 업데이트를 놓치지 않을 수 있습니다.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-light border">
+                                <h6 class="alert-heading">
+                                    <i class="mdi mdi-magnify me-1"></i>검색 활용
+                                </h6>
+                                <p class="small mb-0">
+                                    상단 검색창을 활용하여 특정 후보자나 정보를 빠르게 찾을 수 있습니다.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사이드바 -->
+        <div class="col-lg-4">
+            <!-- 빠른 링크 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-link me-2"></i>빠른 링크
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'dashboard:main' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="mdi mdi-view-dashboard me-2"></i>대시보드로 이동
+                        </a>
+                        <a href="{% url 'candidates:create' %}" class="btn btn-outline-success btn-sm">
+                            <i class="mdi mdi-account-plus me-2"></i>후보자 등록
+                        </a>
+                        <a href="{% url 'candidates:list' %}" class="btn btn-outline-warning btn-sm">
+                            <i class="mdi mdi-account-group me-2"></i>후보자 목록
+                        </a>
+                        <a href="{% url 'reports:report_list' %}" class="btn btn-outline-info btn-sm">
+                            <i class="mdi mdi-chart-bar me-2"></i>보고서 보기
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 관련 도움말 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-book-open me-2"></i>관련 도움말
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <a href="{% url 'help:candidates' %}" class="text-decoration-none">
+                                <i class="mdi mdi-chevron-right me-1"></i>후보자 관리
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{% url 'help:users' %}" class="text-decoration-none">
+                                <i class="mdi mdi-chevron-right me-1"></i>사용자 관리
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{% url 'help:reports' %}" class="text-decoration-none">
+                                <i class="mdi mdi-chevron-right me-1"></i>보고서 사용법
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{% url 'help:notifications' %}" class="text-decoration-none">
+                                <i class="mdi mdi-chevron-right me-1"></i>알림 관리
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 문제 해결 -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-wrench me-2"></i>문제 해결
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="mb-2">대시보드가 로드되지 않아요</h6>
+                        <p class="small text-muted mb-0">
+                            브라우저를 새로고침하거나 다시 로그인해보세요.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="mb-2">통계가 업데이트되지 않아요</h6>
+                        <p class="small text-muted mb-0">
+                            페이지를 새로고침하거나 잠시 후 다시 확인해보세요.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="mb-2">알림이 표시되지 않아요</h6>
+                        <p class="small text-muted mb-0">
+                            브라우저 알림 권한을 확인하고 설정을 변경해보세요.
+                        </p>
+                    </div>
+                    <a href="{% url 'help:contact' %}" class="btn btn-outline-warning btn-sm w-100">
+                        <i class="mdi mdi-help-circle me-1"></i>추가 도움 요청
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-warning:hover,
+.btn-outline-info:hover {
+    transform: translateY(-1px);
+}
+
+.alert-light {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+</style>
+{% endblock %} 

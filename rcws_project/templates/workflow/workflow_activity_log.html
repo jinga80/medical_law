@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}활동 로그 - {{ workflow.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 페이지 헤더 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-history text-primary"></i>
+                활동 로그
+            </h1>
+            <p class="text-muted">{{ workflow.title }}의 모든 활동 기록</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <a href="{% url 'workflow:detail' workflow.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> 워크플로우로 돌아가기
+            </a>
+        </div>
+    </div>
+
+    <!-- 브레드크럼 -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+                {% if breadcrumb.url %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ breadcrumb.url }}">
+                            <i class="{{ breadcrumb.icon }}"></i> {{ breadcrumb.text }}
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <i class="{{ breadcrumb.icon }}"></i> {{ breadcrumb.text }}
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+
+    <!-- 활동 로그 목록 -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">활동 로그</h6>
+        </div>
+        <div class="card-body">
+            {% if page_obj %}
+                <div class="timeline">
+                    {% for log in page_obj %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-{{ log.action_type|action_color }}"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        <i class="fas {{ log.action_type|action_icon }}"></i>
+                                        {{ log.action_description }}
+                                    </h6>
+                                    <div class="small text-muted mb-2">
+                                        <i class="fas fa-user"></i> {{ log.performed_by.get_full_name }}
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-clock"></i> {{ log.performed_at|date:"Y-m-d H:i:s" }}
+                                        {% if log.ip_address %}
+                                            <span class="mx-2">•</span>
+                                            <i class="fas fa-globe"></i> {{ log.ip_address }}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if log.old_value or log.new_value %}
+                                    <div class="mt-2">
+                                        {% if log.old_value %}
+                                        <div class="mb-1">
+                                            <small class="text-muted">이전 값:</small>
+                                            <span class="badge bg-secondary">{{ log.old_value }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if log.new_value %}
+                                        <div>
+                                            <small class="text-muted">새 값:</small>
+                                            <span class="badge bg-primary">{{ log.new_value }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if log.step %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">관련 단계:</small>
+                                        <span class="badge bg-info">{{ log.step.name }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- 페이지네이션 -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="페이지 네비게이션" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">아직 활동 로그가 없습니다.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e3e6f0;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #e3e6f0;
+}
+
+.timeline-content {
+    background: #f8f9fc;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #4e73df;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.timeline-content:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+</style>
+{% endblock %} 

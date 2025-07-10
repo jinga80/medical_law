@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}채용 공고 목록{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box bg-gradient-info text-white rounded-3 shadow-sm" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <div class="page-title-left">
+                        <h2 class="page-title mb-2 fw-bold" style="font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="mdi mdi-briefcase-search me-3"></i>채용 공고 목록
+                        </h2>
+                        <ol class="breadcrumb m-0" style="font-size: 0.95rem;">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-home me-1"></i>홈
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">
+                                <i class="mdi mdi-chevron-right mx-2"></i>채용 공고
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="page-title-right">
+                        <a href="{% url 'workflow:job_request_list' %}" class="btn btn-light">
+                            <i class="mdi mdi-arrow-left me-1"></i>채용 요청 목록
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">상태</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="">전체</option>
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="platform" class="form-label">플랫폼</label>
+                            <select name="platform" id="platform" class="form-select">
+                                <option value="">전체</option>
+                                {% for value, label in platform_choices %}
+                                <option value="{{ value }}" {% if request.GET.platform == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">검색</label>
+                            <input type="text" name="search" id="search" class="form-control" 
+                                   placeholder="제목, 요약, 포지션 검색..." value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="sort" class="form-label">정렬</label>
+                            <select name="sort" id="sort" class="form-select">
+                                <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>최신순</option>
+                                <option value="created_at" {% if request.GET.sort == 'created_at' %}selected{% endif %}>오래된순</option>
+                                <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>제목순</option>
+                                <option value="-view_count" {% if request.GET.sort == '-view_count' %}selected{% endif %}>조회수순</option>
+                                <option value="-application_count" {% if request.GET.sort == '-application_count' %}selected{% endif %}>지원자수순</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="mdi mdi-magnify me-1"></i>검색
+                            </button>
+                            <a href="{% url 'workflow:job_posting_list' %}" class="btn btn-outline-secondary">
+                                <i class="mdi mdi-refresh me-1"></i>초기화
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Postings List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>공고 정보</th>
+                                    <th>병원/포지션</th>
+                                    <th>상태</th>
+                                    <th>플랫폼</th>
+                                    <th>통계</th>
+                                    <th>일정</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for posting in page_obj %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if posting.posting_image %}
+                                                <img src="{{ posting.posting_image.url }}" alt="공고 이미지" class="rounded me-3" width="60" height="60" style="object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                    <i class="mdi mdi-briefcase text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    <a href="{% url 'workflow:job_posting_detail' posting.id %}" class="text-decoration-none">
+                                                        {{ posting.title }}
+                                                    </a>
+                                                </h6>
+                                                <small class="text-muted">{{ posting.summary|truncatechars:100 }}</small>
+                                                <div class="mt-1">
+                                                    <small class="text-muted">
+                                                        <i class="mdi mdi-account me-1"></i>{{ posting.created_by.get_full_name }}
+                                                        <i class="mdi mdi-clock ms-2 me-1"></i>{{ posting.created_at|date:"Y-m-d" }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ posting.job_request.hospital_name }}</strong>
+                                            {% if posting.job_request.hospital_branch %}
+                                                <br><small class="text-muted">{{ posting.job_request.hospital_branch }}</small>
+                                            {% endif %}
+                                            <br><span class="badge bg-primary">{{ posting.job_request.position_title }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if posting.status == 'draft' %}
+                                            <span class="badge bg-secondary">{{ posting.get_status_display }}</span>
+                                        {% elif posting.status == 'published' %}
+                                            <span class="badge bg-success">{{ posting.get_status_display }}</span>
+                                        {% elif posting.status == 'paused' %}
+                                            <span class="badge bg-warning">{{ posting.get_status_display }}</span>
+                                        {% elif posting.status == 'closed' %}
+                                            <span class="badge bg-danger">{{ posting.get_status_display }}</span>
+                                        {% elif posting.status == 'expired' %}
+                                            <span class="badge bg-dark">{{ posting.get_status_display }}</span>
+                                        {% endif %}
+                                        {% if posting.is_featured %}
+                                            <br><small class="text-warning"><i class="mdi mdi-star"></i> 주요 공고</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if posting.posting_platform %}
+                                            <span class="badge bg-info">{{ posting.get_platform_display_name }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                        {% if posting.posting_url %}
+                                            <br><small><a href="{{ posting.posting_url }}" target="_blank" class="text-decoration-none">
+                                                <i class="mdi mdi-link"></i> 링크
+                                            </a></small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="text-center">
+                                            <div class="mb-1">
+                                                <i class="mdi mdi-eye text-info"></i>
+                                                <span class="fw-bold">{{ posting.view_count }}</span>
+                                            </div>
+                                            <div>
+                                                <i class="mdi mdi-account-group text-success"></i>
+                                                <span class="fw-bold">{{ posting.application_count }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <div><strong>게시:</strong> {{ posting.posting_date|date:"m-d" }}</div>
+                                            <div><strong>마감:</strong> {{ posting.closing_date|date:"m-d" }}</div>
+                                            {% if posting.is_active %}
+                                                <div class="text-success">
+                                                    <i class="mdi mdi-clock"></i> {{ posting.get_days_remaining }}일 남음
+                                                </div>
+                                            {% elif posting.is_expired %}
+                                                <div class="text-danger">
+                                                    <i class="mdi mdi-alert"></i> 마감됨
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'workflow:job_posting_detail' posting.id %}" class="btn btn-sm btn-outline-primary" title="상세보기">
+                                                <i class="mdi mdi-eye"></i>
+                                            </a>
+                                            {% if posting.status == 'draft' %}
+                                                <a href="{% url 'workflow:job_posting_update' posting.id %}" class="btn btn-sm btn-outline-warning" title="수정">
+                                                    <i class="mdi mdi-pencil"></i>
+                                                </a>
+                                                <form method="post" action="{% url 'workflow:job_posting_publish' posting.id %}" style="display: inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" title="게시" 
+                                                            onclick="return confirm('이 채용 공고를 게시하시겠습니까?')">
+                                                        <i class="mdi mdi-publish"></i>
+                                                    </button>
+                                                </form>
+                                            {% elif posting.status == 'published' %}
+                                                <form method="post" action="{% url 'workflow:job_posting_close' posting.id %}" style="display: inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="마감" 
+                                                            onclick="return confirm('이 채용 공고를 마감하시겠습니까?')">
+                                                        <i class="mdi mdi-close"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                            <a href="{% url 'workflow:job_application_list' posting.id %}" class="btn btn-sm btn-outline-info" title="지원자 목록">
+                                                <i class="mdi mdi-account-group"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="mdi mdi-briefcase-outline" style="font-size: 3rem;"></i>
+                                            <p class="mt-2">등록된 채용 공고가 없습니다.</p>
+                                            <a href="{% url 'workflow:job_request_list' %}" class="btn btn-primary">
+                                                <i class="mdi mdi-plus me-1"></i>채용 요청 보기
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <nav>
+                                <ul class="pagination pagination-rounded justify-content-center mb-0">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">이전</a>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                                            </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">다음</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.btn-group .btn {
+    margin-right: 2px;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,628 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}새 채용 요청{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"새 채용 요청" icon="mdi-file-document-plus" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- 템플릿 선택 섹션 -->
+    {% if templates %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-soft-info">
+                    <h5 class="card-title mb-0">
+                        <i class="mdi mdi-file-document-multiple text-info"></i>
+                        템플릿 선택 (선택사항)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        자주 사용하는 채용 요청 템플릿을 선택하여 기본값을 자동으로 입력할 수 있습니다.
+                    </p>
+                    <div class="row">
+                        {% for template in templates %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0">{{ template.name }}</h6>
+                                        {% if template.is_default %}
+                                            <span class="badge bg-soft-success text-success">
+                                                <i class="mdi mdi-star"></i>
+                                                기본
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="card-text text-muted small mb-2">{{ template.description }}</p>
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <i class="mdi mdi-briefcase"></i>
+                                            {{ template.position_title }}
+                                        </small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            <i class="mdi mdi-domain"></i>
+                                            {{ template.department }}
+                                        </small>
+                                    </div>
+                                    <a href="{% url 'workflow:job_request_create_from_template' template_pk=template.pk %}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="mdi mdi-file-document-edit"></i>
+                                        이 템플릿 사용
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 채용 요청 생성 폼 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="mdi mdi-file-document-plus text-primary"></i>
+                        채용 요청 정보
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="job-request-form">
+                        {% csrf_token %}
+                        
+                        <!-- 1. 병원/지점 선택 섹션 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="mdi mdi-hospital-building"></i>
+                                    병원 및 지점 선택
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_hospital" class="form-label fw-bold">
+                                        병원명 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.hospital }}
+                                    <div class="form-text">채용을 진행할 병원을 선택하세요</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_branch" class="form-label fw-bold">
+                                        지점 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.branch }}
+                                    <div class="form-text">병원 선택 후 해당 지점을 선택하세요</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. 병원 정보 자동입력 섹션 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-success mb-3">
+                                    <i class="mdi mdi-auto-fix"></i>
+                                    병원 정보 (자동입력)
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_hospital_name" class="form-label">
+                                        병원명 <i class="mdi mdi-auto-fix text-success"></i>
+                                    </label>
+                                    {{ form.hospital_name }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_hospital_branch" class="form-label">
+                                        지점명 <i class="mdi mdi-auto-fix text-success"></i>
+                                    </label>
+                                    {{ form.hospital_branch }}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="id_hospital_address" class="form-label">
+                                        주소 <i class="mdi mdi-auto-fix text-success"></i>
+                                    </label>
+                                    {{ form.hospital_address }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_hospital_phone" class="form-label">
+                                        연락처 <i class="mdi mdi-auto-fix text-success"></i>
+                                    </label>
+                                    {{ form.hospital_phone }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_hospital_contact_person" class="form-label">
+                                        담당자명 <i class="mdi mdi-auto-fix text-success"></i>
+                                    </label>
+                                    {{ form.hospital_contact_person }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. 포지션 템플릿 선택 섹션 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-info mb-3">
+                                    <i class="mdi mdi-briefcase"></i>
+                                    포지션 템플릿 선택 (선택사항)
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_position_template" class="form-label">
+                                        포지션 템플릿
+                                    </label>
+                                    {{ form.position_template }}
+                                    <div class="form-text">템플릿 선택 시 채용 정보가 자동으로 입력됩니다</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. 채용 정보 섹션 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="mdi mdi-account-search"></i>
+                                    채용 정보
+                                </h6>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_position_title" class="form-label fw-bold">
+                                        채용 포지션 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.position_title }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_department" class="form-label fw-bold">
+                                        부서 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.department }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_employment_type" class="form-label fw-bold">
+                                        고용 형태 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.employment_type }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_salary_min" class="form-label">
+                                        최소 급여 (만원)
+                                    </label>
+                                    {{ form.salary_min }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_salary_max" class="form-label">
+                                        최대 급여 (만원)
+                                    </label>
+                                    {{ form.salary_max }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. 상세 정보 섹션 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="mdi mdi-text-box"></i>
+                                    상세 정보
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_required_experience" class="form-label fw-bold">
+                                        필수 경력 요구사항 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.required_experience }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_preferred_qualifications" class="form-label">
+                                        우대사항
+                                    </label>
+                                    {{ form.preferred_qualifications }}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="id_job_description" class="form-label fw-bold">
+                                        업무 내용 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.job_description }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_working_hours" class="form-label">
+                                        근무 시간
+                                    </label>
+                                    {{ form.working_hours }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_working_location" class="form-label">
+                                        근무 장소
+                                    </label>
+                                    {{ form.working_location }}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="id_special_requirements" class="form-label">
+                                        특별 요청사항
+                                    </label>
+                                    {{ form.special_requirements }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6. 일정 및 상태 섹션 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="mdi mdi-calendar-clock"></i>
+                                    일정 및 상태
+                                </h6>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_expected_start_date" class="form-label">
+                                        희망 입사일
+                                    </label>
+                                    {{ form.expected_start_date }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_recruitment_period" class="form-label">
+                                        채용 기간
+                                    </label>
+                                    {{ form.recruitment_period }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_urgency_level" class="form-label">
+                                        긴급도
+                                    </label>
+                                    {{ form.urgency_level }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_status" class="form-label">
+                                        상태
+                                    </label>
+                                    {{ form.status }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 제출 버튼 -->
+                        <div class="row">
+                            <div class="col-12">
+                                <hr class="my-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted">
+                                        <small>
+                                            <i class="mdi mdi-information"></i>
+                                            <span class="text-danger">*</span> 표시된 필드는 필수 입력 항목입니다
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'workflow:job_request_list' %}" class="btn btn-secondary me-2">
+                                            <i class="mdi mdi-arrow-left"></i>
+                                            취소
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="mdi mdi-content-save"></i>
+                                            채용 요청 생성
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+// CSRF 토큰 설정
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+// jQuery가 로드될 때까지 대기
+function waitForJQuery(callback) {
+    if (typeof $ !== 'undefined') {
+        callback();
+    } else {
+        setTimeout(function() {
+            waitForJQuery(callback);
+        }, 100);
+    }
+}
+
+waitForJQuery(function() {
+    $(document).ready(function() {
+        console.log('jQuery 로드됨, 스크립트 시작');
+        
+        // 페이지 로드 시 지점 선택 필드 초기화
+        var $branchSelect = $('#id_branch');
+        if ($branchSelect.length > 0) {
+            $branchSelect.empty();
+            $branchSelect.append('<option value="">지점을 선택하세요</option>');
+            console.log('지점 선택 필드 초기화 완료');
+        }
+        
+        // 병원 선택 시 지점 목록 업데이트
+        $('#id_hospital').on('change', function() {
+            var hospitalId = $(this).val();
+            var $branchSelect = $('#id_branch');
+            
+            console.log('병원 선택됨:', hospitalId);
+            console.log('지점 선택 요소:', $branchSelect);
+            
+            if (hospitalId) {
+                // 지점 목록 가져오기
+                console.log('지점 목록 요청 중...');
+                axios.get(`/accounts/api/hospitals/${hospitalId}/branches/`)
+                    .then(function(response) {
+                        console.log('지점 목록 응답:', response.data);
+                        console.log('응답 데이터 타입:', typeof response.data);
+                        console.log('응답 데이터 길이:', response.data ? response.data.length : 'undefined');
+                        
+                        $branchSelect.empty();
+                        $branchSelect.append('<option value="">지점을 선택하세요</option>');
+                        
+                        if (response.data && response.data.length > 0) {
+                            response.data.forEach(function(branch, index) {
+                                console.log(`지점 ${index + 1}:`, branch);
+                                var option = `<option value="${branch.id}">${branch.name}</option>`;
+                                console.log('추가할 옵션:', option);
+                                $branchSelect.append(option);
+                            });
+                            console.log('최종 지점 옵션 수:', $branchSelect.find('option').length);
+                        } else {
+                            console.log('지점 데이터가 없습니다.');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('지점 목록 가져오기 실패:', error);
+                        $branchSelect.empty();
+                        $branchSelect.append('<option value="">지점을 선택하세요</option>');
+                    });
+            } else {
+                $branchSelect.empty();
+                $branchSelect.append('<option value="">지점을 선택하세요</option>');
+            }
+            
+            // 병원 정보 초기화
+            clearHospitalInfo();
+        });
+        
+        // 지점 선택 시 병원 정보 자동입력
+        $('#id_branch').on('change', function() {
+            var branchId = $(this).val();
+            
+            if (branchId) {
+                // 지점 정보 가져오기
+                axios.get(`/accounts/api/branches/${branchId}/`)
+                    .then(function(response) {
+                        var branch = response.data;
+                        var hospital = branch.hospital;
+                        
+                        // 병원 정보 자동입력
+                        $('#id_hospital_name').val(hospital.name);
+                        $('#id_hospital_branch').val(branch.name);
+                        $('#id_hospital_address').val(branch.address);
+                        $('#id_hospital_phone').val(branch.phone);
+                        $('#id_hospital_contact_person').val(branch.manager_name || '');
+                    })
+                    .catch(function(error) {
+                        console.error('지점 정보 가져오기 실패:', error);
+                    });
+            } else {
+                clearHospitalInfo();
+            }
+        });
+        
+        // 포지션 템플릿 선택 시 채용 정보 자동입력
+        $('#id_position_template').on('change', function() {
+            var templateId = $(this).val();
+            
+            console.log('포지션 템플릿 선택됨:', templateId);
+            
+            if (templateId) {
+                // 포지션 템플릿 정보 가져오기
+                console.log('포지션 템플릿 정보 요청 중...');
+                console.log('요청 URL:', `/accounts/api/job-templates/${templateId}/`);
+                
+                // CSRF 토큰 가져오기
+                var csrfToken = $('[name=csrfmiddlewaretoken]').val();
+                console.log('CSRF 토큰:', csrfToken);
+                
+                axios.get(`/accounts/api/job-templates/${templateId}/`, {
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(function(response) {
+                        console.log('포지션 템플릿 응답:', response.data);
+                        var template = response.data;
+                        
+                        // 채용 정보 자동입력
+                        $('#id_position_title').val(template.title);
+                        $('#id_department').val(template.department);
+                        $('#id_employment_type').val(template.employment_type);
+                        $('#id_salary_min').val(template.salary_min);
+                        $('#id_salary_max').val(template.salary_max);
+                        $('#id_required_experience').val(template.required_experience);
+                        $('#id_preferred_qualifications').val(template.preferred_qualifications);
+                        $('#id_job_description').val(template.job_description);
+                        $('#id_working_hours').val(template.working_hours);
+                        $('#id_working_location').val(template.working_location);
+                        $('#id_special_requirements').val(template.special_requirements);
+                        $('#id_recruitment_period').val(template.recruitment_period);
+                        $('#id_urgency_level').val(template.urgency_level);
+                        
+                        console.log('포지션 템플릿 정보 자동입력 완료');
+                        
+                        // 성공 메시지 표시
+                        showAlert('포지션 템플릿 정보가 자동으로 입력되었습니다.', 'success');
+                    })
+                    .catch(function(error) {
+                        console.error('포지션 템플릿 정보 가져오기 실패:', error);
+                        console.error('응답 상태:', error.response ? error.response.status : 'unknown');
+                        console.error('응답 데이터:', error.response ? error.response.data : 'unknown');
+                        console.error('요청 헤더:', error.config ? error.config.headers : 'unknown');
+                        
+                        // 오류 메시지 표시
+                        var errorMessage = '포지션 템플릿 정보를 가져오는 중 오류가 발생했습니다.';
+                        if (error.response && error.response.status === 403) {
+                            errorMessage = '권한이 없습니다. 관리자에게 문의하세요.';
+                        } else if (error.response && error.response.status === 404) {
+                            errorMessage = '템플릿을 찾을 수 없습니다.';
+                        } else if (error.response && error.response.status === 500) {
+                            errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                        } else if (!error.response) {
+                            errorMessage = '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
+                        }
+                        showAlert(errorMessage, 'danger');
+                    });
+            } else {
+                clearPositionInfo();
+                console.log('포지션 템플릿 선택 해제됨');
+            }
+        });
+        
+        // 병원 정보 초기화 함수
+        function clearHospitalInfo() {
+            $('#id_hospital_name').val('');
+            $('#id_hospital_branch').val('');
+            $('#id_hospital_address').val('');
+            $('#id_hospital_phone').val('');
+            $('#id_hospital_contact_person').val('');
+        }
+        
+        // 포지션 정보 초기화 함수
+        function clearPositionInfo() {
+            $('#id_position_title').val('');
+            $('#id_department').val('');
+            $('#id_employment_type').val('');
+            $('#id_salary_min').val('');
+            $('#id_salary_max').val('');
+            $('#id_required_experience').val('');
+            $('#id_preferred_qualifications').val('');
+            $('#id_job_description').val('');
+            $('#id_working_hours').val('');
+            $('#id_working_location').val('');
+            $('#id_special_requirements').val('');
+            $('#id_recruitment_period').val('');
+            $('#id_urgency_level').val('');
+        }
+        
+        // 알림 메시지 표시 함수
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const form = document.querySelector('#job-request-form');
+            form.insertBefore(alertDiv, form.firstChild);
+            
+            // 3초 후 자동 제거
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+        
+        // 폼 제출 시 유효성 검사
+        $('#job-request-form').on('submit', function(e) {
+            var requiredFields = [
+                'id_hospital', 'id_branch', 'id_hospital_name', 'id_hospital_branch',
+                'id_hospital_address', 'id_hospital_phone', 'id_hospital_contact_person',
+                'id_position_title', 'id_department', 'id_employment_type',
+                'id_required_experience', 'id_job_description'
+            ];
+            
+            var isValid = true;
+            
+            requiredFields.forEach(function(fieldId) {
+                var $field = $('#' + fieldId);
+                if (!$field.val()) {
+                    $field.addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $field.removeClass('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('필수 항목을 모두 입력해주세요.');
+                return false;
+            }
+            
+            // 제출 버튼 비활성화
+            var $submitBtn = $(this).find('button[type="submit"]');
+            $submitBtn.prop('disabled', true);
+            $submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>생성 중...');
+        });
+        
+        // 필드 변경 시 유효성 검사 제거
+        $('input, select, textarea').on('input change', function() {
+            $(this).removeClass('is-invalid');
+        });
+        
+        console.log('스크립트 초기화 완료');
+    });
+});
+</script>
+{% endblock %} 

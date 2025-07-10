@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}로그인{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary">리버스 클리닉</h2>
+                        <p class="text-muted">헤드헌팅 협업 채용 시스템</p>
+                    </div>
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="mdi mdi-alert-circle me-2"></i>
+                            사용자명과 비밀번호가 일치하지 않습니다. 다시 시도해주세요.
+                        </div>
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">사용자명</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="mdi mdi-account"></i>
+                                </span>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="id_username" 
+                                       name="username" 
+                                       required 
+                                       autofocus>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="id_password" class="form-label">비밀번호</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="mdi mdi-lock"></i>
+                                </span>
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="id_password" 
+                                       name="password" 
+                                       required>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="mdi mdi-login me-2"></i>
+                                로그인
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <div class="alert alert-info" role="alert">
+                            <h6 class="alert-heading">테스트 계정</h6>
+                            <p class="mb-2"><strong>관리자:</strong> admin / admin123</p>
+                            <p class="mb-2"><strong>일반 사용자:</strong> user / user123</p>
+                            <p class="mb-0"><strong>HR 매니저:</strong> hr / hr123</p>
+                        </div>
+                        <small class="text-muted">
+                            다른 계정으로 로그인하려면 먼저 로그아웃하세요.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

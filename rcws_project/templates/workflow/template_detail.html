@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load workflow_extras %}
+
+{% block title %}{{ template.name }} - 템플릿 상세{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=template.name|add:" - 템플릿 상세" icon="mdi-file-document" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 템플릿 정보 -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">템플릿 정보</h6>
+                        <div>
+                            {% if template.is_default %}
+                                <span class="badge bg-success me-2">기본 템플릿</span>
+                            {% endif %}
+                            <a href="{% url 'workflow:template_update' template.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i> 수정
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if template.description %}
+                    <div class="mb-4">
+                        <h6>설명</h6>
+                        <p>{{ template.description|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>기본 정보</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>포지션:</strong></td>
+                                    <td>{{ template.position_title }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>부서:</strong></td>
+                                    <td>{{ template.department }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>고용 형태:</strong></td>
+                                    <td><span class="badge bg-info">{{ template.get_employment_type_display }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>긴급도:</strong></td>
+                                    <td><span class="badge bg-{{ template.urgency_level|status_color }}">{{ template.get_urgency_level_display }}</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>급여 정보</h6>
+                            <table class="table table-borderless">
+                                {% if template.salary_min or template.salary_max %}
+                                <tr>
+                                    <td><strong>급여 범위:</strong></td>
+                                    <td>
+                                        {% if template.salary_min and template.salary_max %}
+                                            {{ template.salary_min }}만원 ~ {{ template.salary_max }}만원
+                                        {% elif template.salary_min %}
+                                            {{ template.salary_min }}만원 이상
+                                        {% elif template.salary_max %}
+                                            {{ template.salary_max }}만원 이하
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% if template.expected_start_date %}
+                                <tr>
+                                    <td><strong>희망 입사일:</strong></td>
+                                    <td>{{ template.expected_start_date|date:"Y-m-d" }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if template.recruitment_period %}
+                                <tr>
+                                    <td><strong>채용 기간:</strong></td>
+                                    <td>{{ template.recruitment_period }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+
+                    {% if template.hospital_name %}
+                    <div class="mt-4">
+                        <h6>병원 정보</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>병원명:</strong></td>
+                                <td>{{ template.hospital_name }}</td>
+                                <td><strong>지점명:</strong></td>
+                                <td>{{ template.hospital_branch|default:"-" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>주소:</strong></td>
+                                <td colspan="3">{{ template.hospital_address|default:"-" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>연락처:</strong></td>
+                                <td>{{ template.hospital_phone|default:"-" }}</td>
+                                <td><strong>담당자:</strong></td>
+                                <td>{{ template.hospital_contact_person|default:"-" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 요구사항 -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">요구사항</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6>필수 경력 요구사항</h6>
+                        <p>{{ template.required_experience|linebreaks }}</p>
+                    </div>
+                    
+                    {% if template.preferred_qualifications %}
+                    <div class="mb-4">
+                        <h6>우대사항</h6>
+                        <p>{{ template.preferred_qualifications|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <h6>업무 내용</h6>
+                        <p>{{ template.job_description|linebreaks }}</p>
+                    </div>
+                    
+                    {% if template.working_hours or template.working_location %}
+                    <div class="row">
+                        {% if template.working_hours %}
+                        <div class="col-md-6">
+                            <h6>근무 시간</h6>
+                            <p>{{ template.working_hours }}</p>
+                        </div>
+                        {% endif %}
+                        {% if template.working_location %}
+                        <div class="col-md-6">
+                            <h6>근무 장소</h6>
+                            <p>{{ template.working_location }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if template.special_requirements %}
+                    <div class="mt-4">
+                        <h6>특별 요청사항</h6>
+                        <p>{{ template.special_requirements|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 작업 패널 -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">작업</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'workflow:job_request_create_from_template' template.pk %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> 이 템플릿으로 요청 생성
+                        </a>
+                        <a href="{% url 'workflow:template_update' template.pk %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i> 템플릿 수정
+                        </a>
+                        <a href="{% url 'workflow:template_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list"></i> 목록으로 돌아가기
+                        </a>
+                        <a href="{% url 'workflow:template_delete' template.pk %}" class="btn btn-outline-danger">
+                            <i class="fas fa-trash"></i> 템플릿 삭제
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 메타 정보 -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">메타 정보</h6>
+                </div>
+                <div class="card-body">
+                    <div class="small text-muted">
+                        <p><strong>생성자:</strong> {{ template.created_by.get_full_name }}</p>
+                        <p><strong>생성일:</strong> {{ template.created_at|date:"Y-m-d H:i" }}</p>
+                        <p><strong>수정일:</strong> {{ template.updated_at|date:"Y-m-d H:i" }}</p>
+                        <p><strong>상태:</strong> 
+                            {% if template.is_active %}
+                                <span class="badge bg-success">활성</span>
+                            {% else %}
+                                <span class="badge bg-secondary">비활성</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.table-borderless td {
+    padding: 0.5rem 0;
+    border: none;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %} 

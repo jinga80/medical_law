@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}사용 설명서 - RCWS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-title-box bg-gradient-info text-white rounded-3 shadow-sm" style="background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);">
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <div class="page-title-left">
+                        <h2 class="page-title mb-2 fw-bold" style="font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="mdi mdi-help-circle me-3"></i>사용 설명서
+                        </h2>
+                        <ol class="breadcrumb m-0" style="font-size: 0.95rem;">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-home me-1"></i>홈
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">
+                                <i class="mdi mdi-chevron-right mx-2"></i>사용 설명서
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 환영 메시지 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-info d-flex align-items-center justify-content-center mx-auto mb-3" 
+                             style="width: 80px; height: 80px;">
+                            <i class="mdi mdi-help-circle text-white" style="font-size: 2rem;"></i>
+                        </div>
+                        <h3 class="mb-3">RCWS 사용 설명서에 오신 것을 환영합니다!</h3>
+                        <p class="text-muted mb-0" style="font-size: 1.1rem;">
+                            이 가이드를 통해 RCWS(Recruitment Candidate Workflow System)의 모든 기능을 쉽게 사용하실 수 있습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 빠른 시작 가이드 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-rocket-launch me-2"></i>빠른 시작 가이드
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 border rounded h-100">
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto mb-3" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="mdi mdi-view-dashboard text-white" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h6>1. 대시보드 확인</h6>
+                                <p class="small text-muted">시스템 전체 현황을 한눈에 확인하세요.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 border rounded h-100">
+                                <div class="rounded-circle bg-success d-flex align-items-center justify-content-center mx-auto mb-3" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="mdi mdi-account-plus text-white" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h6>2. 후보자 등록</h6>
+                                <p class="small text-muted">새로운 후보자를 시스템에 등록하세요.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 border rounded h-100">
+                                <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center mx-auto mb-3" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="mdi mdi-account-check text-white" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h6>3. 후보자 검토</h6>
+                                <p class="small text-muted">등록된 후보자를 검토하고 승인/거절하세요.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-center p-3 border rounded h-100">
+                                <div class="rounded-circle bg-info d-flex align-items-center justify-content-center mx-auto mb-3" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="mdi mdi-chart-line text-white" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <h6>4. 보고서 확인</h6>
+                                <p class="small text-muted">채용 현황과 통계를 확인하세요.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 기능별 가이드 -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-book-open-variant me-2"></i>기능별 상세 가이드
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 50px; height: 50px;">
+                                            <i class="mdi mdi-view-dashboard text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">대시보드</h6>
+                                            <small class="text-muted">시스템 전체 현황 확인</small>
+                                        </div>
+                                    </div>
+                                    <p class="small text-muted mb-3">
+                                        대시보드에서 전체 채용 현황, 최근 활동, 통계 정보를 한눈에 확인할 수 있습니다.
+                                    </p>
+                                    <a href="{% url 'help:dashboard' %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="mdi mdi-arrow-right me-1"></i>자세히 보기
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-success d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 50px; height: 50px;">
+                                            <i class="mdi mdi-account-group text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">사용자 관리</h6>
+                                            <small class="text-muted">시스템 사용자 관리</small>
+                                        </div>
+                                    </div>
+                                    <p class="small text-muted mb-3">
+                                        시스템 사용자를 추가, 편집, 삭제하고 권한을 관리할 수 있습니다.
+                                    </p>
+                                    <a href="{% url 'help:users' %}" class="btn btn-outline-success btn-sm">
+                                        <i class="mdi mdi-arrow-right me-1"></i>자세히 보기
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 50px; height: 50px;">
+                                            <i class="mdi mdi-account-search text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">후보자 관리</h6>
+                                            <small class="text-muted">채용 후보자 관리</small>
+                                        </div>
+                                    </div>
+                                    <p class="small text-muted mb-3">
+                                        후보자 등록, 검토, 승인/거절, 평가 등 채용 프로세스를 관리합니다.
+                                    </p>
+                                    <a href="{% url 'help:candidates' %}" class="btn btn-outline-warning btn-sm">
+                                        <i class="mdi mdi-arrow-right me-1"></i>자세히 보기
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-info d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 50px; height: 50px;">
+                                            <i class="mdi mdi-briefcase text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">채용 관리</h6>
+                                            <small class="text-muted">채용 프로세스의 단계별 관리와 진행 상황 추적에 대한 가이드입니다.</small>
+                                        </div>
+                                    </div>
+                                    <p class="small text-muted mb-3">
+                                        채용 프로세스의 각 단계를 관리하고 진행 상황을 추적합니다.
+                                    </p>
+                                    <a href="{% url 'help:workflow' %}" class="btn btn-outline-info btn-sm">
+                                        <i class="mdi mdi-arrow-right me-1"></i>자세히 보기
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-danger d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 50px; height: 50px;">
+                                            <i class="mdi mdi-clipboard-check text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">평가 관리</h6>
+                                            <small class="text-muted">후보자 평가 시스템</small>
+                                        </div>
+                                    </div>
+                                    <p class="small text-muted mb-3">
+                                        후보자에 대한 평가를 작성하고 관리하여 객관적인 채용 결정을 지원합니다.
+                                    </p>
+                                    <a href="{% url 'help:evaluations' %}" class="btn btn-outline-danger btn-sm">
+                                        <i class="mdi mdi-arrow-right me-1"></i>자세히 보기
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 50px; height: 50px;">
+                                            <i class="mdi mdi-chart-bar text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">보고서</h6>
+                                            <small class="text-muted">채용 통계 및 분석</small>
+                                        </div>
+                                    </div>
+                                    <p class="small text-muted mb-3">
+                                        채용 현황, 성과 분석, 통계 보고서를 생성하여 데이터 기반 의사결정을 지원합니다.
+                                    </p>
+                                    <a href="{% url 'help:reports' %}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="mdi mdi-arrow-right me-1"></i>자세히 보기
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 사이드바 -->
+        <div class="col-lg-4">
+            <!-- 자주 묻는 질문 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-frequently-asked-questions me-2"></i>자주 묻는 질문
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="mb-2">Q: 비밀번호를 잊어버렸어요</h6>
+                        <p class="small text-muted mb-0">관리자에게 문의하여 비밀번호를 재설정하세요.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="mb-2">Q: 후보자를 어떻게 승인하나요?</h6>
+                        <p class="small text-muted mb-0">후보자 상세 페이지에서 승인 버튼을 클릭하세요.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="mb-2">Q: 파일 업로드가 안 돼요</h6>
+                        <p class="small text-muted mb-0">파일 크기와 형식을 확인해주세요.</p>
+                    </div>
+                    <a href="{% url 'help:faq' %}" class="btn btn-outline-warning btn-sm w-100">
+                        <i class="mdi mdi-plus me-1"></i>더 많은 FAQ 보기
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 문의하기 -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-message-text me-2"></i>문의하기
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">
+                        사용 중 문제가 발생하거나 추가 도움이 필요하시면 언제든 문의해주세요.
+                    </p>
+                    <a href="{% url 'help:contact' %}" class="btn btn-outline-info btn-sm w-100">
+                        <i class="mdi mdi-email me-1"></i>문의하기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-warning:hover,
+.btn-outline-info:hover,
+.btn-outline-danger:hover,
+.btn-outline-secondary:hover {
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %} 

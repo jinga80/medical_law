@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 페이지 타이틀 영역 -->
+    {% include 'includes/page_title.html' %}
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="mdi mdi-clipboard-check-plus me-2"></i>
+                        {% if evaluation %}평가 수정{% else %}새 평가 생성{% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- 면접 선택 -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.interview.id_for_label }}" class="form-label">
+                                    면접 <span class="text-danger">*</span>
+                                </label>
+                                {{ form.interview }}
+                                {% if form.interview.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.interview.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <h6 class="text-primary mb-3">
+                            <i class="mdi mdi-star me-2"></i>평가 항목
+                        </h6>
+
+                        <div class="row">
+                            <!-- 업무 경험 점수 -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.work_experience_score.id_for_label }}" class="form-label">
+                                    업무 경험 점수 (0-20점)
+                                </label>
+                                {{ form.work_experience_score }}
+                                {% if form.work_experience_score.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.work_experience_score.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- 지적 능력 점수 -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.intellectual_ability_score.id_for_label }}" class="form-label">
+                                    지적 능력 점수 (0-20점)
+                                </label>
+                                {{ form.intellectual_ability_score }}
+                                {% if form.intellectual_ability_score.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.intellectual_ability_score.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- 교통편 점수 -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.transportation_score.id_for_label }}" class="form-label">
+                                    교통편 점수 (0-15점)
+                                </label>
+                                {{ form.transportation_score }}
+                                {% if form.transportation_score.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.transportation_score.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- 의사소통 능력 점수 -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.communication_score.id_for_label }}" class="form-label">
+                                    의사소통 능력 점수 (0-10점)
+                                </label>
+                                {{ form.communication_score }}
+                                {% if form.communication_score.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.communication_score.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- 인성 점수 -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.personality_score.id_for_label }}" class="form-label">
+                                    인성 점수 (0-10점)
+                                </label>
+                                {{ form.personality_score }}
+                                {% if form.personality_score.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.personality_score.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- 전체 인상 점수 -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.overall_impression_score.id_for_label }}" class="form-label">
+                                    전체 인상 점수 (0-10점)
+                                </label>
+                                {{ form.overall_impression_score }}
+                                {% if form.overall_impression_score.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.overall_impression_score.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- 전체 평점 -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.overall_rating.id_for_label }}" class="form-label">
+                                    전체 평점 <span class="text-danger">*</span>
+                                </label>
+                                {{ form.overall_rating }}
+                                {% if form.overall_rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.overall_rating.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <h6 class="text-primary mb-3">
+                            <i class="mdi mdi-comment-text me-2"></i>평가 의견
+                        </h6>
+
+                        <div class="row">
+                            <!-- 강점 -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.strengths.id_for_label }}" class="form-label">
+                                    강점
+                                </label>
+                                {{ form.strengths }}
+                                {% if form.strengths.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.strengths.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- 약점 -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.weaknesses.id_for_label }}" class="form-label">
+                                    약점
+                                </label>
+                                {{ form.weaknesses }}
+                                {% if form.weaknesses.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.weaknesses.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- 권장사항 -->
+                            <div class="col-md-8 mb-3">
+                                <label for="{{ form.recommendations.id_for_label }}" class="form-label">
+                                    권장사항
+                                </label>
+                                {{ form.recommendations }}
+                                {% if form.recommendations.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.recommendations.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- 채용 추천 -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.hire_recommendation.id_for_label }}" class="form-label">
+                                    채용 추천
+                                </label>
+                                {{ form.hire_recommendation }}
+                                {% if form.hire_recommendation.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.hire_recommendation.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        
+                        <!-- 버튼 영역 -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'evaluations:list' %}" class="btn btn-secondary">
+                                <i class="mdi mdi-arrow-left me-2"></i>목록으로
+                            </a>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="mdi mdi-content-save me-2"></i>
+                                    {% if evaluation %}수정{% else %}생성{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 폼 유효성 검사
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %} 

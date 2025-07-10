@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}보고서 목록{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"보고서 목록" icon="mdi-chart-line" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-sm-4">
+                            <a href="{% url 'reports:create' %}" class="btn btn-primary mb-2">
+                                <i class="mdi mdi-plus-circle me-2"></i>새 보고서 생성
+                            </a>
+                            <a href="{% url 'help:reports' %}" class="btn btn-outline-info mb-2 ms-2" title="보고서 관리 도움말">
+                                <i class="mdi mdi-help-circle me-2"></i>도움말
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="text-sm-end">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="보고서 검색...">
+                                    <button class="btn btn-secondary" type="button">
+                                        <i class="mdi mdi-magnify"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>보고서</th>
+                                    <th>유형</th>
+                                    <th>생성자</th>
+                                    <th>생성일</th>
+                                    <th>상태</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                <tr>
+                                    <td>
+                                        <h5 class="font-14 my-1 fw-normal">{{ report.title }}</h5>
+                                        <span class="text-muted font-13">{{ report.description|truncatechars:100 }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ report.get_type_color }}">{{ report.get_type_display }}</span>
+                                    </td>
+                                    <td>{{ report.created_by.get_full_name }}</td>
+                                    <td>{{ report.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        {% if report.is_generated %}
+                                            <span class="badge bg-success">생성 완료</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">생성 중</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'reports:detail' report.id %}" class="action-icon">
+                                            <i class="mdi mdi-eye"></i>
+                                        </a>
+                                        {% if report.is_generated %}
+                                            <a href="{% url 'reports:download' report.id %}" class="action-icon">
+                                                <i class="mdi mdi-download"></i>
+                                            </a>
+                                        {% endif %}
+                                        <a href="{% url 'reports:update' report.id %}" class="action-icon">
+                                            <i class="mdi mdi-pencil"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">보고서가 없습니다.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if is_paginated %}
+                    <div class="row">
+                        <div class="col-12">
+                            <nav>
+                                <ul class="pagination pagination-rounded justify-content-center mb-0">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">이전</a>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">다음</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Report Generation -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="header-title mb-3">빠른 보고서 생성</h4>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <i class="mdi mdi-chart-line font-24 text-primary mb-2"></i>
+                                    <h5>월간 성과 보고서</h5>
+                                    <p class="text-muted">이번 달 채용 성과를 분석한 보고서</p>
+                                    <button class="btn btn-primary btn-sm" onclick="generateReport('monthly_performance')">
+                                        생성하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <i class="mdi mdi-account-group font-24 text-success mb-2"></i>
+                                    <h5>후보자 분석 보고서</h5>
+                                    <p class="text-muted">후보자 품질 및 채용 성공률 분석</p>
+                                    <button class="btn btn-success btn-sm" onclick="generateReport('candidate_analysis')">
+                                        생성하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <i class="mdi mdi-clock font-24 text-warning mb-2"></i>
+                                    <h5>채용 분석</h5>
+                                    <p class="text-muted">채용 효율성 및 병목 구간 분석</p>
+                                    <button class="btn btn-warning btn-sm" onclick="generateReport('workflow_analysis')">
+                                        생성하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <i class="mdi mdi-calendar font-24 text-info mb-2"></i>
+                                    <h5>면접 일정 보고서</h5>
+                                    <p class="text-muted">면접 일정 및 결과 요약</p>
+                                    <button class="btn btn-info btn-sm" onclick="generateReport('interview_schedule')">
+                                        생성하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function generateReport(reportType) {
+    fetch('{% url "reports:generate_quick" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({report_type: reportType})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('보고서 생성이 시작되었습니다. 잠시 후 목록을 확인해주세요.');
+            location.reload();
+        } else {
+            alert('보고서 생성 중 오류가 발생했습니다.');
+        }
+    });
+}
+</script>
+{% endblock %} 

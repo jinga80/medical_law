@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}평가 목록{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"평가 목록" icon="mdi-clipboard-check-multiple" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-sm-4">
+                            <a href="{% url 'evaluations:create' %}" class="btn btn-primary mb-2">
+                                <i class="mdi mdi-plus-circle me-2"></i>새 평가 추가
+                            </a>
+                            <a href="{% url 'help:evaluations' %}" class="btn btn-outline-info mb-2 ms-2" title="평가 관리 도움말">
+                                <i class="mdi mdi-help-circle me-2"></i>도움말
+                            </a>
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="text-sm-end">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="평가 검색...">
+                                    <button class="btn btn-secondary" type="button">
+                                        <i class="mdi mdi-magnify"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>후보자</th>
+                                    <th>평가 유형</th>
+                                    <th>평가자</th>
+                                    <th>점수</th>
+                                    <th>평가일</th>
+                                    <th>상태</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for evaluation in evaluations %}
+                                <tr>
+                                    <td class="table-user">
+                                        <div class="d-flex align-items-center">
+                                            {% if evaluation.candidate.profile_image %}
+                                                <img src="{{ evaluation.candidate.profile_image.url }}" alt="table-user" class="me-2 rounded-circle" width="40">
+                                            {% else %}
+                                                <div class="avatar-sm me-2 bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                                                    <span class="text-white font-weight-bold">{{ evaluation.candidate.name|first|upper }}</span>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <a href="{% url 'candidates:detail' evaluation.candidate.id %}" class="text-body fw-semibold">{{ evaluation.candidate.name }}</a>
+                                                <small class="d-block text-muted">{{ evaluation.candidate.target_position }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ evaluation.get_evaluation_type_display }}</td>
+                                    <td>{{ evaluation.evaluator.get_full_name }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ evaluation.get_score_color }}">{{ evaluation.score }}/5</span>
+                                    </td>
+                                    <td>{{ evaluation.created_at|date:"Y-m-d" }}</td>
+                                    <td>
+                                        {% if evaluation.is_completed %}
+                                            <span class="badge bg-success">완료</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">진행중</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'evaluations:detail' evaluation.id %}" class="action-icon">
+                                            <i class="mdi mdi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'evaluations:update' evaluation.id %}" class="action-icon">
+                                            <i class="mdi mdi-pencil"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">평가 내역이 없습니다.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if is_paginated %}
+                    <div class="row">
+                        <div class="col-12">
+                            <nav>
+                                <ul class="pagination pagination-rounded justify-content-center mb-0">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">이전</a>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">다음</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

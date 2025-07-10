@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}채용 삭제 확인{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 페이지 헤더 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-trash text-danger"></i>
+                채용 삭제 확인
+            </h1>
+            <p class="text-muted">채용을 삭제하기 전에 확인해주세요</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <a href="{% url 'workflow:detail' workflow.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> 돌아가기
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        삭제 확인
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-trash fa-3x text-danger mb-3"></i>
+                        <h5 class="text-danger">정말로 이 채용을 삭제하시겠습니까?</h5>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-info-circle"></i> 삭제될 정보</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>채용 제목:</strong> {{ workflow.title }}</li>
+                            <li><strong>생성자:</strong> {{ workflow.created_by.get_full_name }}</li>
+                            <li><strong>생성일:</strong> {{ workflow.created_at|date:"Y-m-d H:i" }}</li>
+                            <li><strong>단계 수:</strong> {{ workflow.steps.count }}개</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>주의:</strong> 이 작업은 되돌릴 수 없습니다. 모든 관련 데이터가 영구적으로 삭제됩니다.
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{% url 'workflow:detail' workflow.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> 취소
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> 삭제 확인
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

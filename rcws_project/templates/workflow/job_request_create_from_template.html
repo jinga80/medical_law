@@ -1,0 +1,603 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}템플릿 사용: {{ template.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 페이지 타이틀 -->
+    <div class="page-title-box d-flex align-items-center justify-content-between">
+        <div class="page-title-left">
+            <h4 class="mb-0">
+                <i class="mdi mdi-file-document-edit page-icon"></i>
+                {{ page_title }}
+            </h4>
+        </div>
+        <div class="page-title-right">
+            <ol class="breadcrumb m-0">
+                {% for breadcrumb in breadcrumbs %}
+                    {% if breadcrumb.url %}
+                        <li class="breadcrumb-item">
+                            <a href="{{ breadcrumb.url }}">
+                                <i class="mdi {{ breadcrumb.icon }}"></i>
+                                {{ breadcrumb.text }}
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="breadcrumb-item active">
+                            <i class="mdi {{ breadcrumb.icon }}"></i>
+                            {{ breadcrumb.text }}
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="mdi mdi-information-outline text-info"></i>
+                        템플릿 정보
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">{{ template.name }}</h6>
+                            <p class="text-muted">{{ template.description }}</p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <span class="badge bg-soft-info text-info">
+                                <i class="mdi mdi-tag"></i>
+                                {% if template.branch %}
+                                    {{ template.branch.get_full_name }}
+                                {% else %}
+                                    공통 템플릿
+                                {% endif %}
+                            </span>
+                            {% if template.is_default %}
+                                <span class="badge bg-soft-success text-success ms-2">
+                                    <i class="mdi mdi-star"></i>
+                                    기본 템플릿
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="mdi mdi-file-document-plus text-primary"></i>
+                        채용 요청 정보
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- 병원 정보 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="mdi mdi-hospital-building"></i>
+                                    병원 정보
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_hospital" class="form-label">
+                                        병원명 선택 <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="hospital" id="id_hospital" class="form-select">
+                                        <option value="">병원을 선택하세요</option>
+                                        {% for hospital in hospitals %}
+                                            <option value="{{ hospital.id }}">{{ hospital.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_branch" class="form-label">
+                                        지점 선택 <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="branch" id="id_branch" class="form-select">
+                                        <option value="">지점을 선택하세요</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.hospital_name.id_for_label }}" class="form-label">
+                                        병원명 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.hospital_name }}
+                                    {% if form.hospital_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.hospital_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.hospital_branch.id_for_label }}" class="form-label">
+                                        지점명 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.hospital_branch }}
+                                    {% if form.hospital_branch.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.hospital_branch.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.hospital_address.id_for_label }}" class="form-label">
+                                        병원 주소 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.hospital_address }}
+                                    {% if form.hospital_address.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.hospital_address.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.hospital_phone.id_for_label }}" class="form-label">
+                                        병원 연락처 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.hospital_phone }}
+                                    {% if form.hospital_phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.hospital_phone.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.hospital_contact_person.id_for_label }}" class="form-label">
+                                        담당자명 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.hospital_contact_person }}
+                                    {% if form.hospital_contact_person.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.hospital_contact_person.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 채용 정보 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="mdi mdi-briefcase"></i>
+                                    채용 정보
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.position_title.id_for_label }}" class="form-label">
+                                        채용 포지션 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.position_title }}
+                                    {% if form.position_title.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.position_title.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.department.id_for_label }}" class="form-label">
+                                        부서 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.department }}
+                                    {% if form.department.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.department.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.employment_type.id_for_label }}" class="form-label">
+                                        고용 형태 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.employment_type }}
+                                    {% if form.employment_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.employment_type.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.urgency_level.id_for_label }}" class="form-label">
+                                        긴급도
+                                    </label>
+                                    {{ form.urgency_level }}
+                                    {% if form.urgency_level.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.urgency_level.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 급여 정보 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="mdi mdi-currency-krw"></i>
+                                    급여 정보
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.salary_min.id_for_label }}" class="form-label">
+                                        최소 급여 (만원)
+                                    </label>
+                                    {{ form.salary_min }}
+                                    {% if form.salary_min.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.salary_min.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.salary_max.id_for_label }}" class="form-label">
+                                        최대 급여 (만원)
+                                    </label>
+                                    {{ form.salary_max }}
+                                    {% if form.salary_max.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.salary_max.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 요구사항 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="mdi mdi-account-check"></i>
+                                    요구사항
+                                </h6>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.required_experience.id_for_label }}" class="form-label">
+                                        필수 경력 요구사항 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.required_experience }}
+                                    {% if form.required_experience.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.required_experience.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.preferred_qualifications.id_for_label }}" class="form-label">
+                                        우대사항
+                                    </label>
+                                    {{ form.preferred_qualifications }}
+                                    {% if form.preferred_qualifications.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.preferred_qualifications.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.job_description.id_for_label }}" class="form-label">
+                                        업무 내용 <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.job_description }}
+                                    {% if form.job_description.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.job_description.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.working_hours.id_for_label }}" class="form-label">
+                                        근무 시간
+                                    </label>
+                                    {{ form.working_hours }}
+                                    {% if form.working_hours.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.working_hours.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.working_location.id_for_label }}" class="form-label">
+                                        근무 장소
+                                    </label>
+                                    {{ form.working_location }}
+                                    {% if form.working_location.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.working_location.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 추가 요청사항 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="mdi mdi-plus-circle"></i>
+                                    추가 요청사항
+                                </h6>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.special_requirements.id_for_label }}" class="form-label">
+                                        특별 요청사항
+                                    </label>
+                                    {{ form.special_requirements }}
+                                    {% if form.special_requirements.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.special_requirements.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.expected_start_date.id_for_label }}" class="form-label">
+                                        희망 입사일
+                                    </label>
+                                    {{ form.expected_start_date }}
+                                    {% if form.expected_start_date.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.expected_start_date.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.recruitment_period.id_for_label }}" class="form-label">
+                                        채용 기간
+                                    </label>
+                                    {{ form.recruitment_period }}
+                                    {% if form.recruitment_period.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.recruitment_period.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 버튼 -->
+                        <div class="row">
+                            <div class="col-12 text-end">
+                                <a href="{% url 'workflow:job_request_create' %}" class="btn btn-secondary me-2">
+                                    <i class="mdi mdi-arrow-left"></i>
+                                    뒤로가기
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="mdi mdi-content-save"></i>
+                                    템플릿으로 생성
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+// CSRF 토큰 설정
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+// jQuery가 로드될 때까지 대기
+function waitForJQuery(callback) {
+    if (typeof $ !== 'undefined') {
+        callback();
+    } else {
+        setTimeout(function() {
+            waitForJQuery(callback);
+        }, 100);
+    }
+}
+
+waitForJQuery(function() {
+    $(document).ready(function() {
+        console.log('템플릿에서 채용 요청 생성 페이지 스크립트 시작');
+        
+        // 페이지 로드 시 지점 선택 필드 초기화
+        var $branchSelect = $('#id_branch');
+        if ($branchSelect.length > 0) {
+            $branchSelect.empty();
+            $branchSelect.append('<option value="">지점을 선택하세요</option>');
+            console.log('지점 선택 필드 초기화 완료');
+        }
+        
+        // 병원 선택 시 지점 목록 업데이트
+        $('#id_hospital').on('change', function() {
+            var hospitalId = $(this).val();
+            var $branchSelect = $('#id_branch');
+            
+            console.log('병원 선택됨:', hospitalId);
+            
+            if (hospitalId) {
+                // 지점 목록 가져오기
+                console.log('지점 목록 요청 중...');
+                axios.get(`/accounts/api/hospitals/${hospitalId}/branches/`)
+                    .then(function(response) {
+                        console.log('지점 목록 응답:', response.data);
+                        
+                        $branchSelect.empty();
+                        $branchSelect.append('<option value="">지점을 선택하세요</option>');
+                        
+                        if (response.data && response.data.length > 0) {
+                            response.data.forEach(function(branch, index) {
+                                console.log(`지점 ${index + 1}:`, branch);
+                                var option = `<option value="${branch.id}">${branch.name}</option>`;
+                                $branchSelect.append(option);
+                            });
+                            console.log('최종 지점 옵션 수:', $branchSelect.find('option').length);
+                        } else {
+                            console.log('지점 데이터가 없습니다.');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('지점 목록 가져오기 실패:', error);
+                        $branchSelect.empty();
+                        $branchSelect.append('<option value="">지점을 선택하세요</option>');
+                    });
+            } else {
+                $branchSelect.empty();
+                $branchSelect.append('<option value="">지점을 선택하세요</option>');
+            }
+            
+            // 병원 정보 초기화
+            clearHospitalInfo();
+        });
+        
+        // 지점 선택 시 병원 정보 자동입력
+        $('#id_branch').on('change', function() {
+            var branchId = $(this).val();
+            
+            if (branchId) {
+                // 지점 정보 가져오기
+                axios.get(`/accounts/api/branches/${branchId}/`)
+                    .then(function(response) {
+                        var branch = response.data;
+                        var hospital = branch.hospital;
+                        
+                        // 병원 정보 자동입력
+                        $('#id_hospital_name').val(hospital.name);
+                        $('#id_hospital_branch').val(branch.name);
+                        $('#id_hospital_address').val(branch.address);
+                        $('#id_hospital_phone').val(branch.phone);
+                        $('#id_hospital_contact_person').val(branch.manager_name || '');
+                        
+                        console.log('병원 정보 자동입력 완료');
+                        
+                        // 성공 메시지 표시
+                        showAlert('병원 정보가 자동으로 입력되었습니다.', 'success');
+                    })
+                    .catch(function(error) {
+                        console.error('지점 정보 가져오기 실패:', error);
+                        showAlert('병원 정보를 가져오는 중 오류가 발생했습니다.', 'danger');
+                    });
+            } else {
+                clearHospitalInfo();
+            }
+        });
+        
+        // 병원 정보 초기화 함수
+        function clearHospitalInfo() {
+            $('#id_hospital_name').val('');
+            $('#id_hospital_branch').val('');
+            $('#id_hospital_address').val('');
+            $('#id_hospital_phone').val('');
+            $('#id_hospital_contact_person').val('');
+        }
+        
+        // 알림 메시지 표시 함수
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const form = document.querySelector('form');
+            form.insertBefore(alertDiv, form.firstChild);
+            
+            // 3초 후 자동 제거
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+        
+        // 폼 제출 시 유효성 검사
+        $('form').on('submit', function(e) {
+            var requiredFields = [
+                'id_hospital', 'id_branch', 'id_hospital_name', 'id_hospital_branch',
+                'id_hospital_address', 'id_hospital_phone', 'id_hospital_contact_person',
+                'id_position_title', 'id_department', 'id_employment_type',
+                'id_required_experience', 'id_job_description'
+            ];
+            
+            var isValid = true;
+            
+            requiredFields.forEach(function(fieldId) {
+                var $field = $('#' + fieldId);
+                if (!$field.val()) {
+                    $field.addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $field.removeClass('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('필수 항목을 모두 입력해주세요.');
+                return false;
+            }
+            
+            // 제출 버튼 비활성화
+            var $submitBtn = $(this).find('button[type="submit"]');
+            $submitBtn.prop('disabled', true);
+            $submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>생성 중...');
+        });
+        
+        // 필드 변경 시 유효성 검사 제거
+        $('input, select, textarea').on('input change', function() {
+            $(this).removeClass('is-invalid');
+        });
+        
+        console.log('템플릿에서 채용 요청 생성 페이지 스크립트 초기화 완료');
+    });
+});
+</script>
+{% endblock %} 
