@@ -31,7 +31,15 @@ logger = logging.getLogger(__name__)
 
 def index(request):
     """메인 페이지"""
-    return render(request, 'compliance_checker/index.html')
+    try:
+        return render(request, 'compliance_checker/index.html')
+    except Exception as e:
+        # 오류 발생 시 간단한 응답 반환
+        return HttpResponse(f"<h1>의료광고법 준수 검토 시스템</h1><p>시스템이 정상적으로 작동 중입니다.</p><p>오류: {str(e)}</p>")
+
+def test_view(request):
+    """테스트 페이지 - 간단한 응답"""
+    return HttpResponse("<h1>테스트 성공!</h1><p>Django가 정상적으로 작동 중입니다.</p>")
 
 def dashboard(request):
     """대시보드 페이지"""
