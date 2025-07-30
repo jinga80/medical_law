@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대시보드 - 의료광고법 준수 검토 시스템</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid">
+        <!-- 헤더 -->
+        <div class="hero-section py-4 mb-4">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-5 fw-bold mb-2">
+                            <i class="bi bi-graph-up me-2"></i>대시보드
+                        </h1>
+                        <p class="lead mb-0">의료광고법 준수 검토 시스템 통계</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'index' %}" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-plus-circle me-1"></i>새 분석
+                            </a>
+                            <a href="{% url 'history' %}" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-clock-history me-1"></i>히스토리
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- 통계 카드 -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-primary bg-opacity-10 p-3 rounded">
+                                        <i class="bi bi-bar-chart text-primary fs-4"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title text-muted mb-1">총 분석 수</h6>
+                                    <h3 class="mb-0 fw-bold">{{ total_analyses }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-success bg-opacity-10 p-3 rounded">
+                                        <i class="bi bi-graph-up text-success fs-4"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title text-muted mb-1">평균 점수</h6>
+                                    <h3 class="mb-0 fw-bold">{{ avg_score }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-warning bg-opacity-10 p-3 rounded">
+                                        <i class="bi bi-calendar-check text-warning fs-4"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title text-muted mb-1">최근 30일</h6>
+                                    <h3 class="mb-0 fw-bold">{{ recent_analyses }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card stat-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-info bg-opacity-10 p-3 rounded">
+                                        <i class="bi bi-journal-text text-info fs-4"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title text-muted mb-1">가이드라인</h6>
+                                    <h3 class="mb-0 fw-bold">{{ total_guidelines }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 차트 섹션 -->
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-pie-chart me-2"></i>위험도별 분석 통계
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="riskChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-bar-chart me-2"></i>준수 상태별 통계
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 최근 분석 결과 -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clock-history me-2"></i>최근 분석 결과
+                    </h5>
+                    <a href="{% url 'history' %}" class="btn btn-outline-primary btn-sm">
+                        전체 보기
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>분석일시</th>
+                                    <th>입력타입</th>
+                                    <th>점수</th>
+                                    <th>상태</th>
+                                    <th>위험도</th>
+                                    <th>위반건수</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for analysis in recent_results %}
+                                <tr>
+                                    <td>{{ analysis.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        {% if analysis.input_type == 'text' %}
+                                            <span class="badge bg-primary">텍스트</span>
+                                        {% elif analysis.input_type == 'file' %}
+                                            <span class="badge bg-success">파일</span>
+                                        {% else %}
+                                            <span class="badge bg-info">URL</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">{{ analysis.overall_score }}/100</span>
+                                    </td>
+                                    <td>
+                                        {% if analysis.compliance_status == '적합' %}
+                                            <span class="badge bg-success">적합</span>
+                                        {% elif analysis.compliance_status == '부분적합' %}
+                                            <span class="badge bg-warning">부분적합</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">부적합</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if analysis.risk_level == 'low' %}
+                                            <span class="badge bg-success">낮음</span>
+                                        {% elif analysis.risk_level == 'medium' %}
+                                            <span class="badge bg-warning">보통</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">높음</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ analysis.violations|length }}건</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                        <p class="mb-0">아직 분석 결과가 없습니다.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 위험도별 차트
+        const riskCtx = document.getElementById('riskChart').getContext('2d');
+        const riskData = {{ risk_stats|safe }};
+        
+        new Chart(riskCtx, {
+            type: 'doughnut',
+            data: {
+                labels: riskData.map(item => {
+                    if (item.risk_level === 'low') return '낮음';
+                    if (item.risk_level === 'medium') return '보통';
+                    if (item.risk_level === 'high') return '높음';
+                    return item.risk_level;
+                }),
+                datasets: [{
+                    data: riskData.map(item => item.count),
+                    backgroundColor: [
+                        '#198754', // success
+                        '#ffc107', // warning
+                        '#dc3545', // danger
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // 준수 상태별 차트 (임시 데이터)
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        
+        new Chart(statusCtx, {
+            type: 'bar',
+            data: {
+                labels: ['적합', '부분적합', '부적합'],
+                datasets: [{
+                    label: '분석 수',
+                    data: [65, 25, 10], // 임시 데이터
+                    backgroundColor: [
+                        '#198754',
+                        '#ffc107',
+                        '#dc3545'
+                    ],
+                    borderWidth: 1,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

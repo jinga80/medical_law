@@ -1,0 +1,400 @@
+{% extends 'compliance_checker/base.html' %}
+{% load static %}
+
+{% block title %}의료광고법 정보 - 의료광고법 준수 검토 시스템{% endblock %}
+
+{% block extra_css %}
+<style>
+    .advertising-law-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .law-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .law-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .law-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .category-tabs {
+        display: flex;
+        background: white;
+        border-radius: 12px;
+        padding: 0.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+    }
+    
+    .category-tab {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        text-align: center;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #6b7280;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        min-width: 150px;
+    }
+    
+    .category-tab.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .category-tab:hover:not(.active) {
+        background: #f3f4f6;
+        color: #374151;
+    }
+    
+    .content-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+    
+    .content-section.active {
+        display: block;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #667eea;
+    }
+    
+    .law-item {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .law-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .law-item h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+    }
+    
+    .law-item .source {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-bottom: 1rem;
+        font-style: italic;
+    }
+    
+    .law-content {
+        line-height: 1.7;
+        color: #374151;
+    }
+    
+    .law-content h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 1.5rem 0 0.5rem 0;
+    }
+    
+    .law-content ul {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+    }
+    
+    .law-content li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .highlight-box {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 1px solid #f59e0b;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .warning-box {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: 1px solid #ef4444;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .info-box {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border: 1px solid #3b82f6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .step-process {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .step-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .step-number {
+        background: #667eea;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+    
+    .step-content h4 {
+        margin: 0 0 0.5rem 0;
+        color: #1f2937;
+    }
+    
+    .step-content p {
+        margin: 0;
+        color: #6b7280;
+    }
+    
+    .fee-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .fee-table th,
+    .fee-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .fee-table th {
+        background: #667eea;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .fee-table tr:hover {
+        background: #f8fafc;
+    }
+    
+    .responsive-table {
+        overflow-x: auto;
+    }
+    
+    @media (max-width: 768px) {
+        .advertising-law-container {
+            padding: 1rem;
+        }
+        
+        .law-header {
+            padding: 2rem 1rem;
+        }
+        
+        .law-header h1 {
+            font-size: 2rem;
+        }
+        
+        .category-tabs {
+            flex-direction: column;
+        }
+        
+        .category-tab {
+            min-width: auto;
+        }
+        
+        .content-section {
+            padding: 1.5rem;
+        }
+        
+        .step-item {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="advertising-law-container">
+    <!-- 헤더 섹션 -->
+    <div class="law-header">
+        <h1>의료광고법 정보</h1>
+        <p>의료광고 심의대상 매체, 심의 제외 대상, 심의절차 등에 대한 상세한 안내</p>
+    </div>
+    
+    <!-- 카테고리 탭 -->
+    <div class="category-tabs">
+        <button class="category-tab active" data-category="media-types">
+            <i class="fas fa-newspaper"></i> 심의대상 매체
+        </button>
+        <button class="category-tab" data-category="excluded-items">
+            <i class="fas fa-check-circle"></i> 심의 제외 대상
+        </button>
+        <button class="category-tab" data-category="review-process">
+            <i class="fas fa-clipboard-list"></i> 심의절차
+        </button>
+    </div>
+    
+    <!-- 심의대상 매체 섹션 -->
+    <div id="media-types" class="content-section active">
+        <h2 class="section-title">심의대상 매체</h2>
+        
+        <div class="info-box">
+            <h4><i class="fas fa-info-circle"></i> 안내</h4>
+            <p>의료광고를 게재하려는 매체가 다음에 해당하는 경우 사전심의가 필요합니다.</p>
+        </div>
+        
+        {% for info in law_infos.의료광고법 %}
+            {% if "심의대상 매체" in info.title %}
+                <div class="law-item">
+                    <h3>{{ info.title }}</h3>
+                    <div class="source">출처: {{ info.source }}</div>
+                    <div class="law-content">
+                        {{ info.content|linebreaks }}
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    
+    <!-- 심의 제외 대상 섹션 -->
+    <div id="excluded-items" class="content-section">
+        <h2 class="section-title">심의 제외 대상</h2>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-lightbulb"></i> 심의 제외 조건</h4>
+            <p>아래 내용으로만 구성된 경우 심의에서 제외됩니다. 다만, 심의를 원할 경우 위원회에 사전심의를 신청할 수 있습니다.</p>
+        </div>
+        
+        {% for info in law_infos.의료광고법 %}
+            {% if "심의 제외" in info.title %}
+                <div class="law-item">
+                    <h3>{{ info.title }}</h3>
+                    <div class="source">출처: {{ info.source }}</div>
+                    <div class="law-content">
+                        {{ info.content|linebreaks }}
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    
+    <!-- 심의절차 섹션 -->
+    <div id="review-process" class="content-section">
+        <h2 class="section-title">심의절차</h2>
+        
+        <div class="info-box">
+            <h4><i class="fas fa-info-circle"></i> 심의절차 개요</h4>
+            <p>의료광고 심의는 다음과 같은 절차로 진행됩니다.</p>
+        </div>
+        
+        <!-- 의사협회 심의절차 -->
+        <div class="law-item">
+            <h3><i class="fas fa-user-md"></i> 대한의사협회 심의절차</h3>
+            {% for info in law_infos.심의 절차 %}
+                {% if "대한의사협회" in info.title %}
+                    <div class="source">출처: {{ info.source }}</div>
+                    <div class="law-content">
+                        {{ info.content|linebreaks }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <!-- 치과협회 심의절차 -->
+        <div class="law-item">
+            <h3><i class="fas fa-tooth"></i> 치과의사협회 심의절차</h3>
+            {% for info in law_infos.심의 절차 %}
+                {% if "치과의사협회" in info.title %}
+                    <div class="source">출처: {{ info.source }}</div>
+                    <div class="law-content">
+                        {{ info.content|linebreaks }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.category-tab');
+    const sections = document.querySelectorAll('.content-section');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetCategory = this.getAttribute('data-category');
+            
+            // 탭 활성화 상태 변경
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 섹션 표시/숨김
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetCategory) {
+                    section.classList.add('active');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %} 

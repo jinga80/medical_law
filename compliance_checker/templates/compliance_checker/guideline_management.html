@@ -1,0 +1,666 @@
+{% extends 'compliance_checker/base.html' %}
+{% load static %}
+
+{% block title %}가이드라인 관리 - 의료광고법 준수 검토 시스템{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-card {
+        transition: transform 0.2s;
+    }
+    .category-card:hover {
+        transform: translateY(-2px);
+    }
+    .document-card {
+        border-left: 4px solid #007bff;
+    }
+    .document-card.laws {
+        border-left-color: #28a745;
+    }
+    .document-card.precedents {
+        border-left-color: #ffc107;
+    }
+    .document-card.penalties {
+        border-left-color: #dc3545;
+    }
+    .document-card.notices {
+        border-left-color: #17a2b8;
+    }
+    .document-card.reviews {
+        border-left-color: #6f42c1;
+    }
+    .update-badge {
+        font-size: 0.75rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 헤더 섹션 -->
+<div class="bg-primary text-white py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h3 mb-2">
+                    <i class="bi bi-journal-text me-2"></i>가이드라인 관리 시스템
+                </h1>
+                <p class="mb-0 opacity-75">법령, 판례, 처벌사례 등을 체계적으로 관리하고 AI 분석을 통해 업데이트된 내용을 시스템에 반영</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'index' %}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-house me-1"></i>홈
+                    </a>
+                    <button class="btn btn-outline-light btn-sm" onclick="showCreateModal()">
+                        <i class="bi bi-plus-circle me-1"></i>새 문서
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <!-- 통계 카드 -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">총 문서 수</h6>
+                    <h3 class="text-primary fw-bold">{{ documents.count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">최근 업데이트</h6>
+                    <h3 class="text-success fw-bold">{{ recent_updates.count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">AI 분석</h6>
+                    <h3 class="text-info fw-bold">{{ ai_analysis_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">활성 문서</h6>
+                    <h3 class="text-warning fw-bold">{{ active_documents_count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 카테고리별 통계 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-pie-chart me-2"></i>카테고리별 문서 현황
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for category_code, category_name in categories %}
+                        <div class="col-md-4 col-lg-2 mb-3">
+                            <div class="category-card card text-center h-100">
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        {% if category_code == 'guidelines' %}
+                                            <i class="bi bi-journal-text text-primary fs-4"></i>
+                                        {% elif category_code == 'laws' %}
+                                            <i class="bi bi-book text-success fs-4"></i>
+                                        {% elif category_code == 'precedents' %}
+                                            <i class="bi bi-gavel text-warning fs-4"></i>
+                                        {% elif category_code == 'penalties' %}
+                                            <i class="bi bi-exclamation-triangle text-danger fs-4"></i>
+                                        {% elif category_code == 'notices' %}
+                                            <i class="bi bi-megaphone text-info fs-4"></i>
+                                        {% elif category_code == 'reviews' %}
+                                            <i class="bi bi-clipboard-check text-purple fs-4"></i>
+                                        {% endif %}
+                                    </div>
+                                    <h6 class="card-title">{{ category_name }}</h6>
+                                    <h4 class="fw-bold">{{ category_counts|get_item:category_code|default:0 }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 문서 목록 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-list-ul me-2"></i>가이드라인 문서 목록
+                    </h5>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="refreshDocuments()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>새로고침
+                        </button>
+                        <a href="{% url 'guideline_updates' %}" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-clock-history me-1"></i>업데이트 이력
+                        </a>
+                        <a href="{% url 'ai_analysis_history' %}" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-robot me-1"></i>AI 분석 이력
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if documents %}
+                        <div class="row">
+                            {% for document in documents %}
+                            <div class="col-lg-6 col-xl-4 mb-4">
+                                <div class="card document-card h-100 {{ document.category }}">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-primary bg-opacity-10 p-2 rounded">
+                                                    {% if document.category == 'guidelines' %}
+                                                        <i class="bi bi-journal-text text-primary"></i>
+                                                    {% elif document.category == 'laws' %}
+                                                        <i class="bi bi-book text-success"></i>
+                                                    {% elif document.category == 'precedents' %}
+                                                        <i class="bi bi-gavel text-warning"></i>
+                                                    {% elif document.category == 'penalties' %}
+                                                        <i class="bi bi-exclamation-triangle text-danger"></i>
+                                                    {% elif document.category == 'notices' %}
+                                                        <i class="bi bi-megaphone text-info"></i>
+                                                    {% elif document.category == 'reviews' %}
+                                                        <i class="bi bi-clipboard-check text-purple"></i>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="card-title mb-1">{{ document.title }}</h6>
+                                                <small class="text-muted">{{ document.category_display }}</small>
+                                            </div>
+                                        </div>
+                                        
+                                        {% if document.description %}
+                                        <p class="card-text text-muted small mb-3">
+                                            {{ document.description|truncatechars:100 }}
+                                        </p>
+                                        {% endif %}
+                                        
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <small class="text-muted">
+                                                <i class="bi bi-calendar me-1"></i>
+                                                {{ document.created_at|date:"Y-m-d" }}
+                                            </small>
+                                            {% if document.effective_date %}
+                                            <small class="text-muted">
+                                                <i class="bi bi-calendar-check me-1"></i>
+                                                {{ document.effective_date|date:"Y-m-d" }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="btn-group w-100" role="group">
+                                            <button class="btn btn-outline-primary btn-sm" 
+                                                    onclick="viewDocument({{ document.id }})">
+                                                <i class="bi bi-eye me-1"></i>보기
+                                            </button>
+                                            <button class="btn btn-outline-success btn-sm" 
+                                                    onclick="editDocument({{ document.id }})">
+                                                <i class="bi bi-pencil me-1"></i>수정
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" 
+                                                    onclick="analyzeDocument({{ document.id }})">
+                                                <i class="bi bi-robot me-1"></i>AI 분석
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" 
+                                                    onclick="deleteDocument({{ document.id }})">
+                                                <i class="bi bi-trash me-1"></i>삭제
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-journal-text display-1 text-muted mb-3"></i>
+                            <h5 class="text-muted mb-2">등록된 가이드라인 문서가 없습니다</h5>
+                            <p class="text-muted mb-3">첫 번째 가이드라인 문서를 등록해보세요.</p>
+                            <button class="btn btn-primary" onclick="showCreateModal()">
+                                <i class="bi bi-plus-circle me-1"></i>새 문서 등록
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 최근 업데이트 -->
+    {% if recent_updates %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clock-history me-2"></i>최근 업데이트
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>문서</th>
+                                    <th>업데이트 유형</th>
+                                    <th>업데이트자</th>
+                                    <th>업데이트 사유</th>
+                                    <th>일시</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for update in recent_updates %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ update.document.title }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ update.document.category_display }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary update-badge">
+                                            {{ update.get_update_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ update.updated_by }}</td>
+                                    <td>{{ update.update_reason|truncatechars:50 }}</td>
+                                    <td>{{ update.created_at|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- 새 문서 생성 모달 -->
+<div class="modal fade" id="createDocumentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle me-2"></i>새 가이드라인 문서 등록
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createDocumentForm">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label for="title" class="form-label">문서 제목 *</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="category" class="form-label">카테고리 *</label>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="">선택하세요</option>
+                                {% for category_code, category_name in categories %}
+                                <option value="{{ category_code }}">{{ category_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="description" class="form-label">설명</label>
+                            <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label for="content" class="form-label">내용 *</label>
+                            <textarea class="form-control" id="content" name="content" rows="10" required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="source" class="form-label">출처</label>
+                            <input type="text" class="form-control" id="source" name="source">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="effective_date" class="form-label">시행일</label>
+                            <input type="date" class="form-control" id="effective_date" name="effective_date">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="order" class="form-label">정렬 순서</label>
+                            <input type="number" class="form-control" id="order" name="order" value="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="updated_by" class="form-label">등록자</label>
+                            <input type="text" class="form-control" id="updated_by" name="updated_by" value="관리자">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="createDocument()">
+                    <i class="bi bi-plus-circle me-1"></i>등록
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 문서 상세 보기 모달 -->
+<div class="modal fade" id="documentDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-journal-text me-2"></i>문서 상세 정보
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="documentDetailContent">
+                    <!-- 문서 상세 내용이 여기에 로드됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI 분석 모달 -->
+<div class="modal fade" id="aiAnalysisModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-robot me-2"></i>AI 분석
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="analysisType" class="form-label">분석 유형</label>
+                    <select class="form-select" id="analysisType">
+                        <option value="content_analysis">내용 분석</option>
+                        <option value="compliance_check">준수성 검토</option>
+                        <option value="risk_assessment">위험도 평가</option>
+                        <option value="improvement_suggestions">개선 제안</option>
+                    </select>
+                </div>
+                <div id="aiAnalysisResult">
+                    <!-- AI 분석 결과가 여기에 표시됩니다 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="startAIAnalysis()">
+                    <i class="bi bi-robot me-1"></i>분석 시작
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentDocumentId = null;
+
+function showCreateModal() {
+    document.getElementById('createDocumentForm').reset();
+    new bootstrap.Modal(document.getElementById('createDocumentModal')).show();
+}
+
+function createDocument() {
+    const form = document.getElementById('createDocumentForm');
+    const formData = new FormData(form);
+    
+    const data = {
+        title: formData.get('title'),
+        category: formData.get('category'),
+        description: formData.get('description'),
+        content: formData.get('content'),
+        source: formData.get('source'),
+        effective_date: formData.get('effective_date'),
+        order: parseInt(formData.get('order')) || 0,
+        updated_by: formData.get('updated_by')
+    };
+    
+    fetch('{% url "create_guideline_document" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', data.message);
+            bootstrap.Modal.getInstance(document.getElementById('createDocumentModal')).hide();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert('danger', data.error);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', '문서 생성 중 오류가 발생했습니다.');
+        console.error('Error:', error);
+    });
+}
+
+function viewDocument(documentId) {
+    fetch(`/api/guideline-documents/${documentId}/`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const doc = data.document;
+            const content = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4>${doc.title}</h4>
+                        <p class="text-muted">${doc.category_display}</p>
+                        ${doc.description ? `<p class="mb-3">${doc.description}</p>` : ''}
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>내용</h6>
+                                <div style="max-height: 400px; overflow-y: auto;">
+                                    ${doc.content.replace(/\n/g, '<br>')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6>문서 정보</h6>
+                                <p><strong>출처:</strong> ${doc.source || '없음'}</p>
+                                <p><strong>시행일:</strong> ${doc.effective_date || '없음'}</p>
+                                <p><strong>생성일:</strong> ${doc.created_at}</p>
+                                <p><strong>수정일:</strong> ${doc.updated_at}</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>최근 업데이트</h6>
+                                ${data.updates.length > 0 ? 
+                                    data.updates.map(update => 
+                                        `<div class="mb-2">
+                                            <small class="text-muted">${update.created_at}</small><br>
+                                            <strong>${update.update_reason}</strong>
+                                        </div>`
+                                    ).join('') : 
+                                    '<p class="text-muted">업데이트 이력이 없습니다.</p>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('documentDetailContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('documentDetailModal')).show();
+        } else {
+            showAlert('danger', data.error);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', '문서 조회 중 오류가 발생했습니다.');
+        console.error('Error:', error);
+    });
+}
+
+function editDocument(documentId) {
+    // 문서 수정 기능 구현
+    showAlert('info', '문서 수정 기능은 개발 중입니다.');
+}
+
+function analyzeDocument(documentId) {
+    currentDocumentId = documentId;
+    document.getElementById('aiAnalysisResult').innerHTML = 
+        '<div class="text-center py-4"><i class="bi bi-robot fs-1 text-muted"></i><p class="mt-2">분석 유형을 선택하고 분석을 시작하세요.</p></div>';
+    new bootstrap.Modal(document.getElementById('aiAnalysisModal')).show();
+}
+
+function startAIAnalysis() {
+    if (!currentDocumentId) return;
+    
+    const analysisType = document.getElementById('analysisType').value;
+    const resultDiv = document.getElementById('aiAnalysisResult');
+    
+    resultDiv.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">분석 중...</span>
+            </div>
+            <p class="mt-2">AI 분석을 진행하고 있습니다...</p>
+        </div>
+    `;
+    
+    fetch(`/api/guideline-documents/${currentDocumentId}/analyze/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            analysis_type: analysisType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const result = data.result;
+            resultDiv.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h6>분석 결과</h6>
+                        <p><strong>요약:</strong> ${result.summary}</p>
+                        
+                        <h6 class="mt-3">주요 포인트</h6>
+                        <ul>
+                            ${result.key_points.map(point => `<li>${point}</li>`).join('')}
+                        </ul>
+                        
+                        <h6 class="mt-3">권장사항</h6>
+                        <ul>
+                            ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <strong>위험도:</strong> 
+                                <span class="badge bg-${result.risk_level === 'high' ? 'danger' : result.risk_level === 'medium' ? 'warning' : 'success'}">
+                                    ${result.risk_level}
+                                </span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>준수 점수:</strong> ${result.compliance_score}/100
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        }
+    })
+    .catch(error => {
+        resultDiv.innerHTML = '<div class="alert alert-danger">AI 분석 중 오류가 발생했습니다.</div>';
+        console.error('Error:', error);
+    });
+}
+
+function deleteDocument(documentId) {
+    if (confirm('정말로 이 문서를 삭제하시겠습니까?')) {
+        fetch(`/api/guideline-documents/${documentId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showAlert('danger', data.error);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', '문서 삭제 중 오류가 발생했습니다.');
+            console.error('Error:', error);
+        });
+    }
+}
+
+function refreshDocuments() {
+    location.reload();
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %} 

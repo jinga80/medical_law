@@ -1,0 +1,484 @@
+{% extends 'compliance_checker/base.html' %}
+{% load compliance_extras %}
+
+{% block title %}의료법 정보 - 의료광고법 준수 검토 시스템{% endblock %}
+
+{% block extra_css %}
+<style>
+    .medical-law-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .law-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .law-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .law-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .main-category-tabs {
+        display: flex;
+        background: white;
+        border-radius: 12px;
+        padding: 0.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+    }
+    
+    .main-category-tab {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        text-align: center;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #6b7280;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        min-width: 150px;
+    }
+    
+    .main-category-tab.active {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    .main-category-tab:hover:not(.active) {
+        background: #f3f4f6;
+        color: #374151;
+    }
+    
+    .association-tabs {
+        display: flex;
+        background: white;
+        border-radius: 12px;
+        padding: 0.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+    }
+    
+    .association-tab {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        text-align: center;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #6b7280;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        min-width: 150px;
+    }
+    
+    .association-tab.active {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    .association-tab:hover:not(.active) {
+        background: #f3f4f6;
+        color: #374151;
+    }
+    
+    .content-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+    
+    .content-section.active {
+        display: block;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #3b82f6;
+    }
+    
+    .law-item {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #3b82f6;
+        transition: all 0.3s ease;
+    }
+    
+    .law-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .law-item h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+    }
+    
+    .law-item .source {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-bottom: 1rem;
+        font-style: italic;
+    }
+    
+    .law-content {
+        line-height: 1.7;
+        color: #374151;
+    }
+    
+    .law-content h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 1.5rem 0 0.5rem 0;
+    }
+    
+    .law-content ul {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+    }
+    
+    .law-content li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-box {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border: 1px solid #3b82f6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .info-box h4 {
+        color: #1e40af;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-box p {
+        color: #1e3a8a;
+        margin: 0;
+    }
+    
+    .association-info {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .association-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    .association-card {
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+    
+    .association-card.medical {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-left-color: #3b82f6;
+    }
+    
+    .association-card.dental {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-left-color: #10b981;
+    }
+    
+    .association-card h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .association-card.medical h3 {
+        color: #1e40af;
+    }
+    
+    .association-card.dental h3 {
+        color: #065f46;
+    }
+    
+    .association-card ul {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .association-card li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .association-card li:last-child {
+        border-bottom: none;
+    }
+    
+    @media (max-width: 768px) {
+        .medical-law-container {
+            padding: 1rem;
+        }
+        
+        .law-header {
+            padding: 2rem 1rem;
+        }
+        
+        .law-header h1 {
+            font-size: 2rem;
+        }
+        
+        .main-category-tabs,
+        .association-tabs {
+            flex-direction: column;
+        }
+        
+        .main-category-tab,
+        .association-tab {
+            min-width: auto;
+        }
+        
+        .content-section {
+            padding: 1.5rem;
+        }
+        
+        .association-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="medical-law-container">
+    <!-- 헤더 섹션 -->
+    <div class="law-header">
+        <h1>의료법 정보</h1>
+        <p>의료법, 의료광고법, 심의절차 등 의료광고 관련 모든 정보</p>
+    </div>
+    
+    <!-- 메인 카테고리 탭 -->
+    <div class="main-category-tabs">
+        <button class="main-category-tab active" data-category="medical-law">
+            <i class="fas fa-balance-scale"></i> 의료법
+        </button>
+        <button class="main-category-tab" data-category="advertising-law">
+            <i class="fas fa-newspaper"></i> 의료광고법
+        </button>
+        <button class="main-category-tab" data-category="review-process">
+            <i class="fas fa-clipboard-list"></i> 심의절차
+        </button>
+    </div>
+    
+    <!-- 협회별 탭 (의료법 카테고리에서만 표시) -->
+    <div id="association-tabs" class="association-tabs">
+        <button class="association-tab medical active" data-association="medical">
+            <i class="fas fa-user-md"></i> 대한의사협회
+        </button>
+        <button class="association-tab dental" data-association="dental">
+            <i class="fas fa-tooth"></i> 치과의사협회
+        </button>
+    </div>
+    
+    <!-- 의료법 섹션 -->
+    <div id="medical-law" class="content-section active">
+        <h2 class="section-title">의료법</h2>
+        
+        <div class="info-box">
+            <h4><i class="fas fa-info-circle"></i> 의료법 개요</h4>
+            <p>의료법은 의료인과 의료기관의 의료광고에 대한 기본 규정을 담고 있습니다. 의료법 제27조는 의료광고의 원칙을, 제56조~57조는 의료광고의 제한사항을 규정합니다.</p>
+        </div>
+        
+        {% for info in law_infos.의료법 %}
+            <div class="law-item">
+                <h3>{{ info.title }}</h3>
+                <div class="source">출처: {{ info.source }}</div>
+                <div class="law-content">
+                    {{ info.content|linebreaks }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- 의료광고법 섹션 -->
+    <div id="advertising-law" class="content-section">
+        <h2 class="section-title">의료광고법</h2>
+        
+        <div class="info-box">
+            <h4><i class="fas fa-info-circle"></i> 의료광고법 개요</h4>
+            <p>의료광고법은 의료광고의 심의대상 매체, 심의 제외 대상, 심의절차 등에 대한 상세한 규정을 담고 있습니다.</p>
+        </div>
+        
+        <!-- 심의대상 매체 -->
+        <div class="law-item">
+            <h3><i class="fas fa-newspaper"></i> 심의대상 매체</h3>
+            {% for info in law_infos.의료광고법 %}
+                {% if "심의대상 매체" in info.title %}
+                    <div class="source">출처: {{ info.source }}</div>
+                    <div class="law-content">
+                        {{ info.content|linebreaks }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <!-- 심의 제외 대상 -->
+        <div class="law-item">
+            <h3><i class="fas fa-check-circle"></i> 심의 제외 대상</h3>
+            {% for info in law_infos.의료광고법 %}
+                {% if "심의 제외" in info.title %}
+                    <div class="source">출처: {{ info.source }}</div>
+                    <div class="law-content">
+                        {{ info.content|linebreaks }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- 심의절차 섹션 -->
+    <div id="review-process" class="content-section">
+        <h2 class="section-title">심의절차</h2>
+        
+        <div class="association-info">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">협회별 의료광고 심의 기관</h3>
+            <div class="association-grid">
+                <div class="association-card medical">
+                    <h3><i class="fas fa-user-md"></i> 대한의사협회</h3>
+                    <p class="text-blue-700 mb-3">의료광고심의위원회</p>
+                    <ul class="text-sm text-blue-600">
+                        <li>• 의사, 의원, 병원, 종합병원(치과 제외)</li>
+                        <li>• 요양병원(한의사가 개설한 경우 제외)</li>
+                        <li>• 조산사, 조산원</li>
+                        <li>• 격주 화요일 심의 개최</li>
+                    </ul>
+                </div>
+                <div class="association-card dental">
+                    <h3><i class="fas fa-tooth"></i> 치과의사협회</h3>
+                    <p class="text-green-700 mb-3">치과의료광고심의위원회</p>
+                    <ul class="text-sm text-green-600">
+                        <li>• 치과의사, 치과의원, 치과병원</li>
+                        <li>• 종합병원(치과만 해당)</li>
+                        <li>• 치과 관련 모든 의료광고</li>
+                        <li>• 매월 첫째, 셋째 주 화요일 심의 개최</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 의사협회 심의절차 -->
+        <div class="law-item">
+            <h3><i class="fas fa-user-md"></i> 대한의사협회 심의절차</h3>
+            {% for info in law_infos.심의절차 %}
+                {% if "대한의사협회" in info.title %}
+                    <div class="source">출처: {{ info.source }}</div>
+                    <div class="law-content">
+                        {{ info.content|linebreaks }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <!-- 치과협회 심의절차 -->
+        <div class="law-item">
+            <h3><i class="fas fa-tooth"></i> 치과의사협회 심의절차</h3>
+            {% for info in law_infos.심의절차 %}
+                {% if "치과의사협회" in info.title %}
+                    <div class="source">출처: {{ info.source }}</div>
+                    <div class="law-content">
+                        {{ info.content|linebreaks }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mainTabs = document.querySelectorAll('.main-category-tab');
+    const associationTabs = document.querySelectorAll('.association-tab');
+    const sections = document.querySelectorAll('.content-section');
+    const associationTabsContainer = document.getElementById('association-tabs');
+    
+    // 메인 카테고리 탭 클릭 이벤트
+    mainTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetCategory = this.getAttribute('data-category');
+            
+            // 메인 탭 활성화 상태 변경
+            mainTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 섹션 표시/숨김
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetCategory) {
+                    section.classList.add('active');
+                }
+            });
+            
+            // 의료법 카테고리일 때만 협회별 탭 표시
+            if (targetCategory === 'medical-law') {
+                associationTabsContainer.style.display = 'flex';
+            } else {
+                associationTabsContainer.style.display = 'none';
+            }
+        });
+    });
+    
+    // 협회별 탭 클릭 이벤트 (의료법 카테고리에서만 작동)
+    associationTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetAssociation = this.getAttribute('data-association');
+            
+            // 협회별 탭 활성화 상태 변경
+            associationTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 여기에 협회별 콘텐츠 필터링 로직 추가 가능
+        });
+    });
+});
+</script>
+{% endblock %} 

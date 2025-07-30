@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>히스토리 - 의료광고법 준수 검토 시스템</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .analysis-card {
+            transition: all 0.3s ease;
+        }
+        .analysis-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 0.375rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid">
+        <!-- 헤더 -->
+        <div class="hero-section py-4 mb-4">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-5 fw-bold mb-2">
+                            <i class="bi bi-clock-history me-2"></i>분석 히스토리
+                        </h1>
+                        <p class="lead mb-0">이전 분석 결과들을 확인하고 관리하세요</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'index' %}" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-plus-circle me-1"></i>새 분석
+                            </a>
+                            <a href="{% url 'index' %}" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-graph-up me-1"></i>대시보드
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- 필터 섹션 -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-funnel me-2"></i>필터 및 검색
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="status-filter" class="form-label">준수 상태</label>
+                            <select class="form-select" id="status-filter">
+                                <option value="">전체</option>
+                                <option value="적합">적합</option>
+                                <option value="부분적합">부분적합</option>
+                                <option value="부적합">부적합</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="risk-filter" class="form-label">위험도</label>
+                            <select class="form-select" id="risk-filter">
+                                <option value="">전체</option>
+                                <option value="low">낮음</option>
+                                <option value="medium">보통</option>
+                                <option value="high">높음</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="type-filter" class="form-label">입력 타입</label>
+                            <select class="form-select" id="type-filter">
+                                <option value="">전체</option>
+                                <option value="text">텍스트</option>
+                                <option value="file">파일</option>
+                                <option value="url">URL</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="date-filter" class="form-label">날짜 범위</label>
+                            <select class="form-select" id="date-filter">
+                                <option value="">전체</option>
+                                <option value="today">오늘</option>
+                                <option value="week">이번 주</option>
+                                <option value="month">이번 달</option>
+                                <option value="quarter">이번 분기</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="search-input" 
+                                       placeholder="분석 내용으로 검색...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary flex-fill" id="apply-filters">
+                                    <i class="bi bi-funnel me-1"></i>필터 적용
+                                </button>
+                                <button class="btn btn-outline-secondary" id="clear-filters">
+                                    <i class="bi bi-x-circle me-1"></i>초기화
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 결과 통계 -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">총 분석 수</h6>
+                            <h3 class="text-primary fw-bold">{{ total_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">적합</h6>
+                            <h3 class="text-success fw-bold">{{ compliant_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">부분적합</h6>
+                            <h3 class="text-warning fw-bold">{{ partial_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">부적합</h6>
+                            <h3 class="text-danger fw-bold">{{ non_compliant_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 분석 결과 목록 -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-list-ul me-2"></i>분석 결과 목록
+                    </h5>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary btn-sm" id="export-selected">
+                            <i class="bi bi-download me-1"></i>선택 내보내기
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" id="delete-selected">
+                            <i class="bi bi-trash me-1"></i>선택 삭제
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if analyses %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" class="form-check-input" id="select-all">
+                                        </th>
+                                        <th>분석일시</th>
+                                        <th>입력타입</th>
+                                        <th>점수</th>
+                                        <th>상태</th>
+                                        <th>위험도</th>
+                                        <th>위반건수</th>
+                                        <th>AI 개선</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for analysis in analyses %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input analysis-checkbox" 
+                                                   value="{{ analysis.id }}">
+                                        </td>
+                                        <td>{{ analysis.created_at|date:"Y-m-d H:i" }}</td>
+                                        <td>
+                                            {% if analysis.input_type == 'text' %}
+                                                <span class="badge bg-primary">텍스트</span>
+                                            {% elif analysis.input_type == 'file' %}
+                                                <span class="badge bg-success">파일</span>
+                                            {% else %}
+                                                <span class="badge bg-info">URL</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold">{{ analysis.overall_score }}/100</span>
+                                        </td>
+                                        <td>
+                                            {% if analysis.compliance_status == '적합' %}
+                                                <span class="badge bg-success">적합</span>
+                                            {% elif analysis.compliance_status == '부분적합' %}
+                                                <span class="badge bg-warning">부분적합</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">부적합</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if analysis.risk_level == 'low' %}
+                                                <span class="badge bg-success">낮음</span>
+                                            {% elif analysis.risk_level == 'medium' %}
+                                                <span class="badge bg-warning">보통</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">높음</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ analysis.violations|length }}건</td>
+                                        <td>
+                                            {% if analysis.has_ai_improvements %}
+                                                <span class="badge bg-info">있음</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">없음</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{% url 'show_result' analysis.id %}" 
+                                                   class="btn btn-outline-primary" 
+                                                   title="상세 결과 보기">
+                                                    <i class="bi bi-file-text"></i>
+                                                </a>
+                                                <button class="btn btn-outline-info" 
+                                                        onclick="viewDetails('{{ analysis.id }}')"
+                                                        title="간단 보기">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-success" 
+                                                        onclick="exportAnalysis('{{ analysis.id }}')"
+                                                        title="내보내기">
+                                                    <i class="bi bi-download"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" 
+                                                        onclick="deleteAnalysis('{{ analysis.id }}')"
+                                                        title="삭제">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 페이지네이션 -->
+                        {% if analyses.has_other_pages %}
+                        <nav aria-label="분석 결과 페이지네이션">
+                            <ul class="pagination justify-content-center">
+                                {% if analyses.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ analyses.previous_page_number }}">이전</a>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in analyses.paginator.page_range %}
+                                    {% if analyses.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > analyses.number|add:'-3' and num < analyses.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if analyses.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ analyses.next_page_number }}">다음</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                            <h5 class="text-muted mb-2">분석 결과가 없습니다</h5>
+                            <p class="text-muted mb-3">새로운 분석을 시작해보세요.</p>
+                            <a href="{% url 'index' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>새 분석 시작
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 상세 보기 모달 -->
+    <div class="modal fade" id="detailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">분석 상세 결과</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modal-content">
+                    <!-- 상세 내용이 여기에 로드됩니다 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" id="export-detail">내보내기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let currentAnalysisId = null;
+
+        // 전체 선택 체크박스
+        document.getElementById('select-all').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.analysis-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // 필터 적용
+        document.getElementById('apply-filters').addEventListener('click', function() {
+            const status = document.getElementById('status-filter').value;
+            const risk = document.getElementById('risk-filter').value;
+            const type = document.getElementById('type-filter').value;
+            const date = document.getElementById('date-filter').value;
+            const search = document.getElementById('search-input').value;
+
+            let url = window.location.pathname + '?';
+            const params = new URLSearchParams();
+
+            if (status) params.append('status', status);
+            if (risk) params.append('risk', risk);
+            if (type) params.append('type', type);
+            if (date) params.append('date', date);
+            if (search) params.append('search', search);
+
+            window.location.href = url + params.toString();
+        });
+
+        // 필터 초기화
+        document.getElementById('clear-filters').addEventListener('click', function() {
+            document.getElementById('status-filter').value = '';
+            document.getElementById('risk-filter').value = '';
+            document.getElementById('type-filter').value = '';
+            document.getElementById('date-filter').value = '';
+            document.getElementById('search-input').value = '';
+        });
+
+        // 상세 보기
+        function viewDetails(analysisId) {
+            currentAnalysisId = analysisId;
+            
+            fetch(`/api/analysis/${analysisId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayAnalysisDetails(data.result);
+                        new bootstrap.Modal(document.getElementById('detailsModal')).show();
+                    } else {
+                        alert('분석 결과를 불러올 수 없습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('오류가 발생했습니다.');
+                });
+        }
+
+        // 상세 내용 표시
+        function displayAnalysisDetails(analysis) {
+            const modalContent = document.getElementById('modal-content');
+            
+            // 위반 항목과 권장사항을 안전하게 처리
+            const violations = analysis.violations || [];
+            const recommendations = analysis.recommendations || [];
+            const aiImprovements = analysis.ai_improvements || [];
+            
+            modalContent.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>기본 정보</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>분석 ID:</strong> ${analysis.id}</li>
+                            <li><strong>분석일시:</strong> ${new Date(analysis.created_at).toLocaleString('ko-KR')}</li>
+                            <li><strong>입력타입:</strong> ${analysis.input_type || '텍스트'}</li>
+                            <li><strong>준수 점수:</strong> ${analysis.overall_score}/100</li>
+                            <li><strong>준수 상태:</strong> 
+                                <span class="badge ${analysis.compliance_status === '적합' ? 'bg-success' : analysis.compliance_status === '부분적합' ? 'bg-warning' : 'bg-danger'}">
+                                    ${analysis.compliance_status}
+                                </span>
+                            </li>
+                            <li><strong>위험도:</strong> 
+                                <span class="badge ${analysis.risk_level === 'low' ? 'bg-success' : analysis.risk_level === 'medium' ? 'bg-warning' : 'bg-danger'}">
+                                    ${analysis.risk_level === 'low' ? '낮음' : analysis.risk_level === 'medium' ? '보통' : '높음'}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>위반 항목 (${violations.length}건)</h6>
+                        ${violations.length > 0 ? 
+                            violations.map(v => `
+                                <div class="alert alert-danger py-2 mb-2">
+                                    <strong>${v.category || v.title || '위반 항목'}</strong><br>
+                                    <small>${v.description || v.legal_basis || '위반 내용'}</small>
+                                    ${v.penalty ? `<br><small class="text-muted">처벌: ${v.penalty}</small>` : ''}
+                                    ${v.keywords ? `<br><small class="text-muted">키워드: ${v.keywords.join(', ')}</small>` : ''}
+                                </div>
+                            `).join('') : 
+                            '<p class="text-muted">위반 항목이 없습니다.</p>'
+                        }
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>개선 권장사항 (${recommendations.length}건)</h6>
+                        ${recommendations.length > 0 ? 
+                            recommendations.map(r => `
+                                <div class="alert alert-success py-2 mb-2">
+                                    <strong>${r.category || r.title || '권장사항'}</strong><br>
+                                    <small>${r.guide || r.description || '개선 방안'}</small>
+                                </div>
+                            `).join('') : 
+                            '<p class="text-muted">권장사항이 없습니다.</p>'
+                        }
+                    </div>
+                </div>
+                
+                ${aiImprovements.length > 0 ? 
+                    '<div class="row mt-3"><div class="col-12"><h6>AI 맞춤형 개선 방안 (' + aiImprovements.length + '건)</h6>' +
+                    aiImprovements.map(improvement => 
+                        '<div class="alert alert-info py-2 mb-2"><strong>' + (improvement.category || '개선 방안') + '</strong><br>' +
+                        '<small>' + (improvement.suggestion || improvement.description || 'AI 제안 내용') + '</small>' +
+                        (improvement.reason ? '<br><small class="text-muted">이유: ' + improvement.reason + '</small>' : '') +
+                        '</div>'
+                    ).join('') + '</div></div>' : ''
+                }
+                
+                ${analysis.input_text ? `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>원본 텍스트</h6>
+                        <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
+                            <small class="text-muted">${analysis.input_text.length > 500 ? analysis.input_text.substring(0, 500) + '...' : analysis.input_text}</small>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        }
+
+        // 분석 내보내기
+        function exportAnalysis(analysisId) {
+            // 사용자에게 내보내기 형식 선택
+            const format = confirm('PDF로 내보내시겠습니까?\n확인: PDF, 취소: JSON');
+            
+            if (format) {
+                // PDF 내보내기
+                window.open(`/api/export/pdf/${analysisId}/`, '_blank');
+            } else {
+                // JSON 내보내기
+                fetch(`/api/analysis/${analysisId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const exportData = {
+                                analysis_id: data.result.id,
+                                export_date: new Date().toISOString(),
+                                analysis_result: data.result
+                            };
+                            
+                            const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+                                type: 'application/json'
+                            });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `의료광고법-분석결과-${analysisId}-${new Date().toISOString().split('T')[0]}.json`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                        } else {
+                            alert('분석 결과를 불러올 수 없습니다.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('내보내기 중 오류가 발생했습니다.');
+                    });
+            }
+        }
+
+        // 분석 삭제
+        function deleteAnalysis(analysisId) {
+            if (confirm('정말로 이 분석 결과를 삭제하시겠습니까?')) {
+                fetch(`/api/analysis/${analysisId}/delete/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('삭제에 실패했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('오류가 발생했습니다.');
+                });
+            }
+        }
+
+        // 선택된 항목 내보내기
+        document.getElementById('export-selected').addEventListener('click', function() {
+            const selectedIds = Array.from(document.querySelectorAll('.analysis-checkbox:checked'))
+                                   .map(cb => cb.value);
+            
+            if (selectedIds.length === 0) {
+                alert('내보낼 항목을 선택해주세요.');
+                return;
+            }
+
+            // 선택된 항목들을 JSON으로 내보내기
+            const exportData = {
+                selected_ids: selectedIds,
+                export_date: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+                type: 'application/json'
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `의료광고법-분석결과-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // 선택된 항목 삭제
+        document.getElementById('delete-selected').addEventListener('click', function() {
+            const selectedIds = Array.from(document.querySelectorAll('.analysis-checkbox:checked'))
+                                   .map(cb => cb.value);
+            
+            if (selectedIds.length === 0) {
+                alert('삭제할 항목을 선택해주세요.');
+                return;
+            }
+
+            if (confirm(`선택된 ${selectedIds.length}개 항목을 삭제하시겠습니까?`)) {
+                // 선택된 항목들을 순차적으로 삭제
+                let deletedCount = 0;
+                let errorCount = 0;
+                
+                const deletePromises = selectedIds.map(id => 
+                    fetch(`/api/analysis/${id}/delete/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            deletedCount++;
+                        } else {
+                            errorCount++;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        errorCount++;
+                    })
+                );
+                
+                Promise.all(deletePromises).then(() => {
+                    if (errorCount === 0) {
+                        alert(`${deletedCount}개 항목이 성공적으로 삭제되었습니다.`);
+                    } else {
+                        alert(`${deletedCount}개 항목이 삭제되었고, ${errorCount}개 항목 삭제에 실패했습니다.`);
+                    }
+                    location.reload();
+                });
+            }
+        });
+
+        // 상세 내보내기
+        document.getElementById('export-detail').addEventListener('click', function() {
+            if (currentAnalysisId) {
+                exportAnalysis(currentAnalysisId);
+            }
+        });
+
+        // CSRF 토큰 가져오기
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html> 

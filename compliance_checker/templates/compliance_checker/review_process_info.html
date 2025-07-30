@@ -1,0 +1,752 @@
+{% extends 'compliance_checker/base.html' %}
+{% load static %}
+
+{% block title %}심의절차 안내 - 의료광고법 준수 검토 시스템{% endblock %}
+
+{% block extra_css %}
+<style>
+    .review-process-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .process-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .process-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .process-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .association-tabs {
+        display: flex;
+        background: white;
+        border-radius: 12px;
+        padding: 0.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+    }
+    
+    .association-tab {
+        flex: 1;
+        padding: 1.5rem 2rem;
+        text-align: center;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #6b7280;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        min-width: 200px;
+    }
+    
+    .association-tab.active {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    .association-tab:hover:not(.active) {
+        background: #f3f4f6;
+        color: #374151;
+    }
+    
+    .association-tab.medical {
+        border-left: 4px solid #3b82f6;
+    }
+    
+    .association-tab.dental {
+        border-left: 4px solid #10b981;
+    }
+    
+    .association-tab.active.medical {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+    
+    .association-tab.active.dental {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .content-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+    
+    .content-section.active {
+        display: block;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #10b981;
+    }
+    
+    .process-overview {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border: 1px solid #10b981;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .process-overview h3 {
+        color: #065f46;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+    
+    .process-overview p {
+        color: #047857;
+        line-height: 1.6;
+    }
+    
+    .step-timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    
+    .step-timeline::before {
+        content: '';
+        position: absolute;
+        left: 1rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, #10b981, #3b82f6);
+    }
+    
+    .step-item {
+        position: relative;
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #10b981;
+        transition: all 0.3s ease;
+    }
+    
+    .step-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .step-item::before {
+        content: '';
+        position: absolute;
+        left: -1.5rem;
+        top: 1.5rem;
+        width: 1rem;
+        height: 1rem;
+        background: #10b981;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .step-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .step-number {
+        background: #10b981;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    .step-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    
+    .step-content {
+        color: #6b7280;
+        line-height: 1.6;
+    }
+    
+    .step-content ul {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+    }
+    
+    .step-content li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .fee-section {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .fee-section h3 {
+        color: #1f2937;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+    
+    .fee-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .fee-table th,
+    .fee-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .fee-table th {
+        background: #10b981;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .fee-table tr:hover {
+        background: #f8fafc;
+    }
+    
+    .document-section {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .document-section h3 {
+        color: #92400e;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+    
+    .document-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .document-list li {
+        background: white;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .document-list li:before {
+        content: '📄';
+        margin-right: 0.5rem;
+    }
+    
+    .warning-box {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border: 1px solid #ef4444;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .warning-box h4 {
+        color: #991b1b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .warning-box p {
+        color: #7f1d1d;
+        margin: 0;
+    }
+    
+    .info-box {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border: 1px solid #3b82f6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .info-box h4 {
+        color: #1e40af;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-box p {
+        color: #1e3a8a;
+        margin: 0;
+    }
+    
+    .responsive-table {
+        overflow-x: auto;
+    }
+    
+    @media (max-width: 768px) {
+        .review-process-container {
+            padding: 1rem;
+        }
+        
+        .process-header {
+            padding: 2rem 1rem;
+        }
+        
+        .process-header h1 {
+            font-size: 2rem;
+        }
+        
+        .association-tabs {
+            flex-direction: column;
+        }
+        
+        .association-tab {
+            min-width: auto;
+        }
+        
+        .content-section {
+            padding: 1.5rem;
+        }
+        
+        .step-timeline {
+            padding-left: 1rem;
+        }
+        
+        .step-timeline::before {
+            left: 0.5rem;
+        }
+        
+        .step-item::before {
+            left: -0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="review-process-container">
+    <!-- 헤더 섹션 -->
+    <div class="process-header">
+        <h1>심의절차 안내</h1>
+        <p>대한의사협회 및 치과의사협회 의료광고 심의절차에 대한 상세한 안내</p>
+    </div>
+    
+    <!-- 협회별 탭 -->
+    <div class="association-tabs">
+        <button class="association-tab medical active" data-association="medical">
+            <i class="fas fa-user-md"></i> 대한의사협회
+        </button>
+        <button class="association-tab dental" data-association="dental">
+            <i class="fas fa-tooth"></i> 치과의사협회
+        </button>
+    </div>
+    
+    <!-- 대한의사협회 심의절차 -->
+    <div id="medical" class="content-section active">
+        <h2 class="section-title">대한의사협회 심의절차</h2>
+        
+        <div class="process-overview">
+            <h3><i class="fas fa-info-circle"></i> 심의절차 개요</h3>
+            <p>대한의사협회 의료광고심의위원회의 심의는 다음과 같은 절차로 진행됩니다. 심의 신청부터 결과 통보까지의 전체 과정을 안내합니다.</p>
+        </div>
+        
+        {% for info in law_infos.심의 절차 %}
+            {% if "대한의사협회" in info.title %}
+                <div class="step-timeline">
+                    <div class="step-item">
+                        <div class="step-header">
+                            <div class="step-number">01</div>
+                            <div class="step-title">심의신청</div>
+                        </div>
+                        <div class="step-content">
+                            <ul>
+                                <li><strong>신청 방법:</strong> 홈페이지를 통한 온라인 신청</li>
+                                <li><strong>신청 시기:</strong> 광고 게시 예정일 기준으로 충분한 여유를 두고 신청</li>
+                                <li><strong>신청 자료:</strong> 광고 시안, 의료기관 정보, 기타 필요 서류</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-header">
+                            <div class="step-number">02</div>
+                            <div class="step-title">접수 및 마감</div>
+                        </div>
+                        <div class="step-content">
+                            <ul>
+                                <li><strong>접수 검토:</strong> 제출된 광고 시안 및 서류를 사무국에서 내용 검토</li>
+                                <li><strong>수수료 부과:</strong> 심의수수료 부과 및 안내</li>
+                                <li><strong>마감 기준:</strong> 심의개최일 기준 전주 목요일 18:00까지 심의수수료 입금 완료</li>
+                                <li><strong>심의 일정:</strong> 격주 화요일 개최 (일정에 따라 탄력적 운영)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-header">
+                            <div class="step-number">03</div>
+                            <div class="step-title">사무국 예비검토</div>
+                        </div>
+                        <div class="step-content">
+                            <ul>
+                                <li><strong>안건 정리:</strong> 심의 안건 정리 및 분류</li>
+                                <li><strong>완료 시점:</strong> 심의일 3일전 완료</li>
+                                <li><strong>자료 배포:</strong> 각 위원 송부 또는 홈페이지 게재</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-header">
+                            <div class="step-number">04</div>
+                            <div class="step-title">위원회심의</div>
+                        </div>
+                        <div class="step-content">
+                            <ul>
+                                <li><strong>승인:</strong> 광고가능 (심의필번호 교부)</li>
+                                <li><strong>조건부승인:</strong> 광고불가 (수정시안 제출 후 위원회 재검토를 거쳐 승인여부 결정, 승인 이후 심의필번호 교부)</li>
+                                <li><strong>불승인:</strong> 광고불가 (심의결과통보서 교부, 15일 이내 재신청 가능)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-header">
+                            <div class="step-number">05</div>
+                            <div class="step-title">심의결과 통보</div>
+                        </div>
+                        <div class="step-content">
+                            <ul>
+                                <li><strong>결과 발송:</strong> 심의결과통지서 발행</li>
+                                <li><strong>광고 사용:</strong> 심의결과통지서를 발행받은 후 심의받은 광고 사용 가능</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 심의 수수료 -->
+                <div class="fee-section">
+                    <h3><i class="fas fa-money-bill-wave"></i> 심의 수수료</h3>
+                    <div class="responsive-table">
+                        <table class="fee-table">
+                            <thead>
+                                <tr>
+                                    <th>광고면 기준</th>
+                                    <th>수수료</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1~5면</td>
+                                    <td>11만원</td>
+                                </tr>
+                                <tr>
+                                    <td>6~10면</td>
+                                    <td>22만원</td>
+                                </tr>
+                                <tr>
+                                    <td>11~15면</td>
+                                    <td>33만원</td>
+                                </tr>
+                                <tr>
+                                    <td>16~20면</td>
+                                    <td>44만원</td>
+                                </tr>
+                                <tr>
+                                    <td>21면 이상</td>
+                                    <td>55만원</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="margin-top: 1rem; color: #6b7280; font-size: 0.9rem;">
+                        <i class="fas fa-info-circle"></i> 인터넷 매체의 경우 출력면 기준으로 적용됩니다.
+                    </p>
+                </div>
+                
+                <!-- 구비서류 -->
+                <div class="document-section">
+                    <h3><i class="fas fa-file-alt"></i> 구비서류</h3>
+                    <h4>필수서류</h4>
+                    <ul class="document-list">
+                        <li><strong>의료광고시안:</strong> 디자인된 광고시안 (인터넷 매체의 경우 노출되는 형태가 적용된 광고시안)</li>
+                        <li><strong>의료기관 개설허가 또는 신고필증 & 사업자등록증:</strong> 개원 준비중인 경우에는 면허증 사본 대체 가능</li>
+                    </ul>
+                    
+                    <h4>추가증빙서류 (해당하는 경우)</h4>
+                    <ul class="document-list">
+                        <li>개원예정, 이전, 확장 등의 내용이 포함된 경우</li>
+                        <li>의료인 정원 등이 포함되어 있는 경우</li>
+                        <li>의료인 약력 관련 내용이 포함된 경우</li>
+                        <li>학교마크 사용 시</li>
+                        <li>의료기기 관련 내용이 포함된 경우</li>
+                        <li>기타 위원회가 필요하다고 인정되는 서류</li>
+                    </ul>
+                </div>
+                
+                <!-- 주의사항 -->
+                <div class="warning-box">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 주의사항</h4>
+                    <ul>
+                        <li>심의결과통지서를 받은 후에만 광고 사용 가능</li>
+                        <li>조건부승인 시 수정사항을 반드시 반영해야 함</li>
+                        <li>불승인 시 15일 이내 재신청 가능</li>
+                        <li>재검토에 따른 심의수수료 추가 청구 없음</li>
+                    </ul>
+                </div>
+                
+                <!-- 심의 유효기간 -->
+                <div class="info-box">
+                    <h4><i class="fas fa-clock"></i> 심의 유효기간</h4>
+                    <p><strong>유효기간:</strong> 심의를 신청하여 승인을 받은 날부터 3년</p>
+                    <p><strong>재심의:</strong> 유효기간 만료 6개월 전에 재심의 신청 필요</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    
+    <!-- 치과의사협회 심의절차 -->
+    <div id="dental" class="content-section">
+        <h2 class="section-title">치과의사협회 심의절차</h2>
+        
+        <div class="process-overview">
+            <h3><i class="fas fa-info-circle"></i> 심의절차 개요</h3>
+            <p>치과의사협회 의료광고심의위원회의 심의는 다음과 같은 절차로 진행됩니다. 치과진료과목 표시 기준과 재심의 청구 절차를 포함한 상세한 안내입니다.</p>
+        </div>
+        
+        {% for info in law_infos.심의 절차 %}
+            {% if "치과의사협회" in info.title %}
+                <div class="step-timeline">
+                    <div class="step-item">
+                        <div class="step-header">
+                            <div class="step-number">01</div>
+                            <div class="step-title">심의신청 및 접수</div>
+                        </div>
+                        <div class="step-content">
+                            <ul>
+                                <li><strong>신청 방법:</strong> 온라인 신청 시스템 또는 서면 신청</li>
+                                <li><strong>신청 시기:</strong> 광고 게시 예정일 기준으로 충분한 여유를 두고 신청</li>
+                                <li><strong>접수 검토:</strong> 제출된 광고 시안 및 서류를 사무국에서 내용 검토</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-header">
+                            <div class="step-number">02</div>
+                            <div class="step-title">수수료 납부 및 마감</div>
+                        </div>
+                        <div class="step-content">
+                            <ul>
+                                <li><strong>수수료 부과:</strong> 심의수수료 부과 및 안내</li>
+                                <li><strong>마감 기준:</strong> 심의개최일 기준 전주 금요일 17:00까지 심의수수료 입금 완료</li>
+                                <li><strong>심의 일정:</strong> 매월 첫째, 셋째 주 화요일 개최 (일정에 따라 탄력적 운영)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-header">
+                            <div class="step-number">03</div>
+                            <div class="step-title">사무국 예비검토</div>
+                        </div>
+                        <div class="step-content">
+                            <ul>
+                                <li><strong>안건 정리:</strong> 심의 안건 정리 및 분류</li>
+                                <li><strong>완료 시점:</strong> 심의일 3일전 완료</li>
+                                <li><strong>자료 배포:</strong> 각 위원 송부 또는 홈페이지 게재</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-header">
+                            <div class="step-number">04</div>
+                            <div class="step-title">위원회심의</div>
+                        </div>
+                        <div class="step-content">
+                            <ul>
+                                <li><strong>승인:</strong> 광고가능 (심의필번호 교부)</li>
+                                <li><strong>조건부승인:</strong> 광고불가 (수정시안 제출 후 위원회 재검토를 거쳐 승인여부 결정, 승인 이후 심의필번호 교부)</li>
+                                <li><strong>불승인:</strong> 광고불가 (심의결과통보서 교부, 15일 이내 재신청 가능)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-header">
+                            <div class="step-number">05</div>
+                            <div class="step-title">심의결과 통보</div>
+                        </div>
+                        <div class="step-content">
+                            <ul>
+                                <li><strong>결과 발송:</strong> 심의결과통지서 발행</li>
+                                <li><strong>광고 사용:</strong> 심의결과통지서를 발행받은 후 심의받은 광고 사용 가능</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 심의 수수료 -->
+                <div class="fee-section">
+                    <h3><i class="fas fa-money-bill-wave"></i> 심의 수수료</h3>
+                    <div class="responsive-table">
+                        <table class="fee-table">
+                            <thead>
+                                <tr>
+                                    <th>광고면 기준</th>
+                                    <th>수수료</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1~5면</td>
+                                    <td>10만원</td>
+                                </tr>
+                                <tr>
+                                    <td>6~10면</td>
+                                    <td>20만원</td>
+                                </tr>
+                                <tr>
+                                    <td>11~15면</td>
+                                    <td>30만원</td>
+                                </tr>
+                                <tr>
+                                    <td>16~20면</td>
+                                    <td>40만원</td>
+                                </tr>
+                                <tr>
+                                    <td>21면 이상</td>
+                                    <td>50만원</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="margin-top: 1rem; color: #6b7280; font-size: 0.9rem;">
+                        <i class="fas fa-info-circle"></i> 인터넷 매체의 경우 출력면 기준으로 적용됩니다.
+                    </p>
+                </div>
+                
+                <!-- 치과진료과목 표시 기준 -->
+                <div class="document-section">
+                    <h3><i class="fas fa-tooth"></i> 치과진료과목 표시 기준</h3>
+                    <h4>표시 가능한 진료과목</h4>
+                    <ul class="document-list">
+                        <li><strong>보철과:</strong> 치아의 결손을 인공물로 보완하는 진료</li>
+                        <li><strong>교정과:</strong> 치아의 배열과 악골의 관계를 정상적으로 만드는 진료</li>
+                        <li><strong>소아치과:</strong> 어린이의 치아와 구강을 진료하는 과목</li>
+                        <li><strong>구강악안면외과:</strong> 구강, 악골, 안면부의 외과적 진료</li>
+                        <li><strong>치주과:</strong> 치아 주위 조직의 질환을 진료하는 과목</li>
+                        <li><strong>치과보존과:</strong> 치아의 질환을 치료하고 보존하는 진료</li>
+                        <li><strong>예방치과:</strong> 치아와 구강의 질환을 예방하는 진료</li>
+                    </ul>
+                    
+                    <div class="warning-box">
+                        <h4><i class="fas fa-exclamation-triangle"></i> 표시 시 주의사항</h4>
+                        <ul>
+                            <li>실제 운영하는 진료과목만 표시 가능</li>
+                            <li>전문의 자격이 있는 경우에만 해당 과목 표시</li>
+                            <li>과장된 표현이나 오해를 줄 수 있는 표현 금지</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- 재심의 청구 절차 -->
+                <div class="info-box">
+                    <h4><i class="fas fa-gavel"></i> 재심의 청구 절차</h4>
+                    <p><strong>재심의 청구 대상:</strong> 심의결과에 이의가 있는 경우, 새로운 증거자료가 있는 경우, 심의절차에 중대한 하자가 있는 경우</p>
+                    <p><strong>재심의 청구 기간:</strong> 심의결과 통지일로부터 30일 이내</p>
+                    <p><strong>재심의 청구 방법:</strong> 서면으로 재심의 청구서 제출, 재심의 청구 사유와 증거자료 첨부, 재심의 수수료 납부</p>
+                    <p><strong>재심의 결과:</strong> 원심의 결과 유지, 원심의 결과 변경 (재심의 결과는 최종 결정)</p>
+                </div>
+                
+                <!-- 주의사항 -->
+                <div class="warning-box">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 주의사항</h4>
+                    <ul>
+                        <li>심의결과통지서를 받은 후에만 광고 사용 가능</li>
+                        <li>조건부승인 시 수정사항을 반드시 반영해야 함</li>
+                        <li>불승인 시 15일 이내 재신청 가능</li>
+                        <li>재검토에 따른 심의수수료 추가 청구 없음</li>
+                        <li>치과진료과목 표시 시 정확한 과목명 사용 필수</li>
+                    </ul>
+                </div>
+                
+                <!-- 심의 유효기간 -->
+                <div class="info-box">
+                    <h4><i class="fas fa-clock"></i> 심의 유효기간</h4>
+                    <p><strong>유효기간:</strong> 심의를 신청하여 승인을 받은 날부터 3년</p>
+                    <p><strong>재심의:</strong> 유효기간 만료 6개월 전에 재심의 신청 필요</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.association-tab');
+    const sections = document.querySelectorAll('.content-section');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetAssociation = this.getAttribute('data-association');
+            
+            // 탭 활성화 상태 변경
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 섹션 표시/숨김
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetAssociation) {
+                    section.classList.add('active');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %} 

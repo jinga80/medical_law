@@ -1,0 +1,751 @@
+{% extends 'compliance_checker/base.html' %}
+{% load static %}
+
+{% block title %}가이드라인 - 의료광고법 준수 검토 시스템{% endblock %}
+
+{% block extra_css %}
+<style>
+    .guidelines-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .guidelines-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .guidelines-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .guidelines-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .function-tabs {
+        display: flex;
+        background: white;
+        border-radius: 12px;
+        padding: 0.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+    }
+    
+    .function-tab {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        text-align: center;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #6b7280;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        min-width: 150px;
+    }
+    
+    .function-tab.active {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    .function-tab:hover:not(.active) {
+        background: #f3f4f6;
+        color: #374151;
+    }
+    
+    .content-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+    
+    .content-section.active {
+        display: block;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #10b981;
+    }
+    
+    .upload-form {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    .upload-area {
+        border: 2px dashed #d1d5db;
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .upload-area:hover {
+        border-color: #10b981;
+        background: #f0fdf4;
+    }
+    
+    .upload-area.dragover {
+        border-color: #10b981;
+        background: #f0fdf4;
+    }
+    
+    .upload-icon {
+        font-size: 3rem;
+        color: #9ca3af;
+        margin-bottom: 1rem;
+    }
+    
+    .upload-text {
+        color: #6b7280;
+        margin-bottom: 0.5rem;
+    }
+    
+    .upload-hint {
+        color: #9ca3af;
+        font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    .guideline-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .guideline-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .guideline-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .guideline-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .guideline-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin-right: 1rem;
+    }
+    
+    .guideline-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .guideline-category {
+        font-size: 0.8rem;
+        color: #6b7280;
+        background: #f3f4f6;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        margin-top: 0.25rem;
+    }
+    
+    .guideline-description {
+        color: #6b7280;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+    
+    .guideline-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 0.8rem;
+        color: #9ca3af;
+    }
+    
+    .guideline-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-action {
+        flex: 1;
+        padding: 0.5rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-view {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .btn-view:hover {
+        background: #bfdbfe;
+    }
+    
+    .btn-download {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .btn-download:hover {
+        background: #a7f3d0;
+    }
+    
+    .btn-delete {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .btn-delete:hover {
+        background: #fecaca;
+    }
+    
+    .search-section {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #10b981;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #d1d5db;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-btn.active {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6b7280;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: #d1d5db;
+        margin-bottom: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .guidelines-container {
+            padding: 1rem;
+        }
+        
+        .guidelines-header {
+            padding: 2rem 1rem;
+        }
+        
+        .guidelines-header h1 {
+            font-size: 2rem;
+        }
+        
+        .function-tabs {
+            flex-direction: column;
+        }
+        
+        .function-tab {
+            min-width: auto;
+        }
+        
+        .content-section {
+            padding: 1.5rem;
+        }
+        
+        .guideline-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .guideline-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="guidelines-container">
+    <!-- 헤더 섹션 -->
+    <div class="guidelines-header">
+        <h1>가이드라인</h1>
+        <p>의료법 및 의료광고법 관련 가이드라인 문서 관리</p>
+    </div>
+    
+    <!-- 기능 탭 -->
+    <div class="function-tabs">
+        <button class="function-tab active" data-function="upload">
+            <i class="fas fa-upload"></i> 업로드
+        </button>
+        <button class="function-tab" data-function="browse">
+            <i class="fas fa-folder-open"></i> 문서 보기
+        </button>
+        <button class="function-tab" data-function="manage">
+            <i class="fas fa-cog"></i> 관리
+        </button>
+    </div>
+    
+    <!-- 업로드 섹션 -->
+    <div id="upload" class="content-section active">
+        <h2 class="section-title">새 가이드라인 업로드</h2>
+        
+        <form id="upload-form" class="upload-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title" class="form-label">가이드라인 제목</label>
+                <input type="text" id="title" name="title" class="form-input" 
+                       placeholder="예: 2025년 의료광고법 주요 변경사항" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="category" class="form-label">카테고리</label>
+                <select id="category" name="category" class="form-input" required>
+                    <option value="">카테고리 선택</option>
+                    <option value="medical_law">의료법</option>
+                    <option value="advertising_law">의료광고법</option>
+                    <option value="guidelines">가이드라인</option>
+                    <option value="notices">공지사항</option>
+                    <option value="penalties">처벌 기준</option>
+                    <option value="review_process">심의 절차</option>
+                    <option value="dental_guidelines">치과의사협회 가이드라인</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="form-label">설명</label>
+                <textarea id="description" name="description" class="form-input" rows="3"
+                          placeholder="가이드라인에 대한 간단한 설명을 입력하세요"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">파일 업로드</label>
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">파일을 드래그하거나 클릭하여 업로드</div>
+                    <div class="upload-hint">지원 형식: PDF, DOC, DOCX, TXT (최대 10MB)</div>
+                    <input type="file" id="file-upload" name="file" accept=".pdf,.doc,.docx,.txt" 
+                           class="d-none" required>
+                </div>
+                <div id="file-status" class="mt-3 d-none"></div>
+            </div>
+            
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-upload"></i> 가이드라인 업로드
+            </button>
+        </form>
+    </div>
+    
+    <!-- 문서 보기 섹션 -->
+    <div id="browse" class="content-section">
+        <h2 class="section-title">가이드라인 문서</h2>
+        
+        <!-- 검색 및 필터 -->
+        <div class="search-section">
+            <input type="text" id="search-input" class="search-input" 
+                   placeholder="가이드라인 제목이나 설명으로 검색...">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">전체</button>
+                <button class="filter-btn" data-filter="medical_law">의료법</button>
+                <button class="filter-btn" data-filter="advertising_law">의료광고법</button>
+                <button class="filter-btn" data-filter="guidelines">가이드라인</button>
+                <button class="filter-btn" data-filter="notices">공지사항</button>
+                <button class="filter-btn" data-filter="penalties">처벌 기준</button>
+                <button class="filter-btn" data-filter="review_process">심의 절차</button>
+                <button class="filter-btn" data-filter="dental_guidelines">치과협회</button>
+            </div>
+        </div>
+        
+        <!-- 가이드라인 목록 -->
+        <div class="guideline-grid" id="guideline-grid">
+            {% if guidelines %}
+                {% for guideline in guidelines %}
+                <div class="guideline-card" data-category="{{ guideline.category }}">
+                    <div class="guideline-header">
+                        <div class="guideline-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="guideline-title">{{ guideline.title }}</h3>
+                            <div class="guideline-category">{{ guideline.get_category_display }}</div>
+                        </div>
+                    </div>
+                    
+                    {% if guideline.description %}
+                    <div class="guideline-description">
+                        {{ guideline.description|truncatechars:100 }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="guideline-meta">
+                        <span><i class="fas fa-calendar"></i> {{ guideline.uploaded_at|date:"Y-m-d" }}</span>
+                        <span><i class="fas fa-file"></i> {{ guideline.file_size|filesizeformat }}</span>
+                    </div>
+                    
+                    <div class="guideline-actions">
+                        <button class="btn-action btn-view" onclick="viewGuideline({{ guideline.id }})">
+                            <i class="fas fa-eye"></i> 보기
+                        </button>
+                        <button class="btn-action btn-download" onclick="downloadGuideline({{ guideline.id }})">
+                            <i class="fas fa-download"></i> 다운로드
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deleteGuideline({{ guideline.id }})">
+                            <i class="fas fa-trash"></i> 삭제
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h3>업로드된 가이드라인이 없습니다</h3>
+                    <p>첫 번째 가이드라인을 업로드해보세요.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- 페이지네이션 -->
+        {% if guidelines.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="가이드라인 페이지네이션">
+                <ul class="pagination justify-content-center">
+                    {% if guidelines.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ guidelines.previous_page_number }}">이전</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in guidelines.paginator.page_range %}
+                        {% if guidelines.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > guidelines.number|add:'-3' and num < guidelines.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if guidelines.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ guidelines.next_page_number }}">다음</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- 관리 섹션 -->
+    <div id="manage" class="content-section">
+        <h2 class="section-title">가이드라인 관리</h2>
+        
+        <div class="management-stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ guidelines.count }}</div>
+                    <div class="stat-label">총 가이드라인</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ guidelines.count|add:"0" }}</div>
+                    <div class="stat-label">활성 가이드라인</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ guidelines.count|add:"0" }}</div>
+                    <div class="stat-label">최근 업데이트</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="management-actions">
+            <button class="btn-primary" onclick="exportAllGuidelines()">
+                <i class="fas fa-download"></i> 전체 내보내기
+            </button>
+            <button class="btn-primary" onclick="refreshGuidelines()">
+                <i class="fas fa-sync"></i> 새로고침
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const functionTabs = document.querySelectorAll('.function-tab');
+    const sections = document.querySelectorAll('.content-section');
+    const uploadArea = document.getElementById('upload-area');
+    const fileUpload = document.getElementById('file-upload');
+    const uploadForm = document.getElementById('upload-form');
+    const searchInput = document.getElementById('search-input');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const guidelineCards = document.querySelectorAll('.guideline-card');
+    
+    // 기능 탭 클릭 이벤트
+    functionTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetFunction = this.getAttribute('data-function');
+            
+            // 탭 활성화 상태 변경
+            functionTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 섹션 표시/숨김
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetFunction) {
+                    section.classList.add('active');
+                }
+            });
+        });
+    });
+    
+    // 파일 업로드 영역 클릭 이벤트
+    uploadArea.addEventListener('click', function() {
+        fileUpload.click();
+    });
+    
+    // 드래그 앤 드롭 이벤트
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileUpload.files = files;
+            updateFileStatus(files[0]);
+        }
+    });
+    
+    // 파일 선택 이벤트
+    fileUpload.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            updateFileStatus(e.target.files[0]);
+        }
+    });
+    
+    // 파일 상태 업데이트
+    function updateFileStatus(file) {
+        const fileStatus = document.getElementById('file-status');
+        fileStatus.classList.remove('d-none');
+        fileStatus.innerHTML = `
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> 선택된 파일: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)
+            </div>
+        `;
+    }
+    
+    // 업로드 폼 제출 (기능 비활성화)
+    uploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('가이드라인 업로드 기능은 현재 준비 중입니다.');
+    });
+    
+    // 검색 기능
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        filterGuidelines();
+    });
+    
+    // 필터 기능
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            filterGuidelines();
+        });
+    });
+    
+    // 가이드라인 필터링
+    function filterGuidelines() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-filter');
+        
+        guidelineCards.forEach(card => {
+            const title = card.querySelector('.guideline-title').textContent.toLowerCase();
+            const description = card.querySelector('.guideline-description')?.textContent.toLowerCase() || '';
+            const category = card.getAttribute('data-category');
+            
+            const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm);
+            const matchesFilter = activeFilter === 'all' || category === activeFilter;
+            
+            if (matchesSearch && matchesFilter) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    // CSRF 토큰 가져오기
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+
+// 가이드라인 보기 (기능 비활성화)
+function viewGuideline(id) {
+    alert('가이드라인 보기 기능은 현재 준비 중입니다.');
+}
+
+// 가이드라인 다운로드 (기능 비활성화)
+function downloadGuideline(id) {
+    alert('가이드라인 다운로드 기능은 현재 준비 중입니다.');
+}
+
+// 가이드라인 삭제 (기능 비활성화)
+function deleteGuideline(id) {
+    alert('가이드라인 삭제 기능은 현재 준비 중입니다.');
+}
+
+// 전체 내보내기
+function exportAllGuidelines() {
+    alert('전체 가이드라인 내보내기 기능은 준비 중입니다.');
+}
+
+// 새로고침
+function refreshGuidelines() {
+    location.reload();
+}
+</script>
+{% endblock %} 

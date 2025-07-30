@@ -1,0 +1,569 @@
+{% extends 'compliance_checker/base.html' %}
+{% load static %}
+
+{% block title %}AI 분석 이력 - 가이드라인 관리{% endblock %}
+
+{% block content %}
+<!-- 헤더 섹션 -->
+<div class="bg-info text-white py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h3 mb-2">
+                    <i class="bi bi-robot me-2"></i>AI 분석 이력
+                </h1>
+                <p class="mb-0 opacity-75">가이드라인 문서에 대한 AI 분석 결과를 확인하고 관리</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'guideline_management' %}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>돌아가기
+                    </a>
+                    <a href="{% url 'index' %}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-house me-1"></i>홈
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <!-- 통계 카드 -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">총 분석 수</h6>
+                    <h3 class="text-info fw-bold">{{ analyses.count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">평균 처리 시간</h6>
+                    <h3 class="text-success fw-bold">2.5초</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">사용된 AI 모델</h6>
+                    <h3 class="text-warning fw-bold">GPT-4</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">분석 유형</h6>
+                    <h3 class="text-primary fw-bold">4가지</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 필터 섹션 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="bi bi-funnel me-2"></i>필터
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="analysis-type-filter" class="form-label">분석 유형</label>
+                    <select class="form-select" id="analysis-type-filter">
+                        <option value="">전체</option>
+                        {% for type_code, type_name in analysis_types %}
+                        <option value="{{ type_code }}">{{ type_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="date-filter" class="form-label">날짜 범위</label>
+                    <select class="form-select" id="date-filter">
+                        <option value="">전체</option>
+                        <option value="today">오늘</option>
+                        <option value="week">이번 주</option>
+                        <option value="month">이번 달</option>
+                        <option value="quarter">이번 분기</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="search-input" class="form-label">검색</label>
+                    <input type="text" class="form-control" id="search-input" placeholder="문서 제목...">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <i class="bi bi-funnel me-1"></i>필터 적용
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                            <i class="bi bi-x-circle me-1"></i>초기화
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 분석 이력 목록 -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-list-ul me-2"></i>AI 분석 이력
+            </h5>
+            <div class="btn-group" role="group">
+                <button class="btn btn-outline-primary btn-sm" onclick="exportAnalyses()">
+                    <i class="bi bi-download me-1"></i>내보내기
+                </button>
+                <button class="btn btn-outline-success btn-sm" onclick="refreshAnalyses()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>새로고침
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if analyses %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>문서</th>
+                                <th>분석 유형</th>
+                                <th>AI 모델</th>
+                                <th>처리 시간</th>
+                                <th>분석일시</th>
+                                <th>작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for analysis in analyses %}
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>{{ analysis.document.title }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ analysis.document.category_display }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        {{ analysis.get_analysis_type_display }}
+                                    </span>
+                                </td>
+                                <td>{{ analysis.ai_model_used }}</td>
+                                <td>{{ analysis.processing_time|default:"-" }}초</td>
+                                <td>{{ analysis.created_at|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-outline-primary" 
+                                                onclick="viewAnalysisResult({{ analysis.id }})">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-info" 
+                                                onclick="viewDocument({{ analysis.document.id }})">
+                                            <i class="bi bi-journal-text"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success" 
+                                                onclick="reanalyzeDocument({{ analysis.document.id }})">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 페이지네이션 -->
+                {% if analyses.has_other_pages %}
+                <nav aria-label="AI 분석 이력 페이지네이션" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if analyses.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ analyses.previous_page_number }}">이전</a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in analyses.paginator.page_range %}
+                            {% if analyses.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > analyses.number|add:'-3' and num < analyses.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if analyses.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ analyses.next_page_number }}">다음</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-robot display-1 text-muted mb-3"></i>
+                    <h5 class="text-muted mb-2">AI 분석 이력이 없습니다</h5>
+                    <p class="text-muted mb-3">가이드라인 문서에 대해 AI 분석을 실행하면 여기에 이력이 표시됩니다.</p>
+                    <a href="{% url 'guideline_management' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-left me-1"></i>가이드라인 관리로 이동
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 분석 결과 상세 보기 모달 -->
+<div class="modal fade" id="analysisResultModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-robot me-2"></i>AI 분석 결과
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="analysisResultContent">
+                    <!-- 분석 결과가 여기에 로드됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 문서 상세 보기 모달 -->
+<div class="modal fade" id="documentDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-journal-text me-2"></i>문서 상세 정보
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="documentDetailContent">
+                    <!-- 문서 상세 내용이 여기에 로드됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 재분석 모달 -->
+<div class="modal fade" id="reanalyzeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-arrow-repeat me-2"></i>재분석
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="reanalysisType" class="form-label">분석 유형</label>
+                    <select class="form-select" id="reanalysisType">
+                        <option value="content_analysis">내용 분석</option>
+                        <option value="compliance_check">준수성 검토</option>
+                        <option value="risk_assessment">위험도 평가</option>
+                        <option value="improvement_suggestions">개선 제안</option>
+                    </select>
+                </div>
+                <div id="reanalysisResult">
+                    <!-- 재분석 결과가 여기에 표시됩니다 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="startReanalysis()">
+                    <i class="bi bi-arrow-repeat me-1"></i>재분석 시작
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentDocumentId = null;
+
+function applyFilters() {
+    const analysisType = document.getElementById('analysis-type-filter').value;
+    const dateFilter = document.getElementById('date-filter').value;
+    const search = document.getElementById('search-input').value;
+    
+    let url = window.location.pathname + '?';
+    const params = [];
+    
+    if (analysisType) params.push(`type=${analysisType}`);
+    if (dateFilter) params.push(`date=${dateFilter}`);
+    if (search) params.push(`search=${encodeURIComponent(search)}`);
+    
+    if (params.length > 0) {
+        url += params.join('&');
+    }
+    
+    window.location.href = url;
+}
+
+function clearFilters() {
+    window.location.href = window.location.pathname;
+}
+
+function refreshAnalyses() {
+    location.reload();
+}
+
+function exportAnalyses() {
+    // AI 분석 이력 내보내기 기능 구현
+    showAlert('info', '내보내기 기능은 개발 중입니다.');
+}
+
+function viewAnalysisResult(analysisId) {
+    // AI 분석 결과 상세 보기 기능 구현
+    fetch(`/api/ai-analysis/${analysisId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayAnalysisResult(data.result);
+                new bootstrap.Modal(document.getElementById('analysisResultModal')).show();
+            } else {
+                showAlert('error', data.error || '분석 결과를 불러올 수 없습니다.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('error', '분석 결과 조회 중 오류가 발생했습니다.');
+        });
+}
+
+function displayAnalysisResult(analysis) {
+    const content = document.getElementById('analysisResultContent');
+    
+    content.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>분석 정보</h6>
+                <ul class="list-unstyled">
+                    <li><strong>분석 ID:</strong> ${analysis.id}</li>
+                    <li><strong>분석 유형:</strong> ${analysis.get_analysis_type_display || analysis.analysis_type}</li>
+                    <li><strong>AI 모델:</strong> ${analysis.ai_model_used}</li>
+                    <li><strong>처리 시간:</strong> ${analysis.processing_time || '-'}초</li>
+                    <li><strong>분석일시:</strong> ${new Date(analysis.created_at).toLocaleString('ko-KR')}</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>문서 정보</h6>
+                <ul class="list-unstyled">
+                    <li><strong>문서 제목:</strong> ${analysis.document.title}</li>
+                    <li><strong>카테고리:</strong> ${analysis.document.category_display}</li>
+                    <li><strong>문서 ID:</strong> ${analysis.document.id}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6>분석 결과</h6>
+                <div class="card">
+                    <div class="card-body">
+                        <pre style="white-space: pre-wrap; font-family: inherit;">${analysis.analysis_result || analysis.result || '분석 결과가 없습니다.'}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function viewDocument(documentId) {
+    fetch(`/api/guideline-documents/${documentId}/`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const doc = data.document;
+            const content = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4>${doc.title}</h4>
+                        <p class="text-muted">${doc.category_display}</p>
+                        ${doc.description ? `<p class="mb-3">${doc.description}</p>` : ''}
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>현재 내용</h6>
+                                <div style="max-height: 400px; overflow-y: auto;">
+                                    ${doc.content.replace(/\n/g, '<br>')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6>문서 정보</h6>
+                                <p><strong>출처:</strong> ${doc.source || '없음'}</p>
+                                <p><strong>시행일:</strong> ${doc.effective_date || '없음'}</p>
+                                <p><strong>생성일:</strong> ${doc.created_at}</p>
+                                <p><strong>수정일:</strong> ${doc.updated_at}</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>AI 분석 이력</h6>
+                                ${data.ai_analyses.length > 0 ? 
+                                    data.ai_analyses.map(analysis => 
+                                        `<div class="mb-2">
+                                            <small class="text-muted">${analysis.created_at}</small><br>
+                                            <strong>${analysis.analysis_type}</strong>
+                                        </div>`
+                                    ).join('') : 
+                                    '<p class="text-muted">AI 분석 이력이 없습니다.</p>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('documentDetailContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('documentDetailModal')).show();
+        } else {
+            showAlert('danger', data.error);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', '문서 조회 중 오류가 발생했습니다.');
+        console.error('Error:', error);
+    });
+}
+
+function reanalyzeDocument(documentId) {
+    currentDocumentId = documentId;
+    document.getElementById('reanalysisResult').innerHTML = 
+        '<div class="text-center py-4"><i class="bi bi-robot fs-1 text-muted"></i><p class="mt-2">분석 유형을 선택하고 재분석을 시작하세요.</p></div>';
+    new bootstrap.Modal(document.getElementById('reanalyzeModal')).show();
+}
+
+function startReanalysis() {
+    if (!currentDocumentId) return;
+    
+    const analysisType = document.getElementById('reanalysisType').value;
+    const resultDiv = document.getElementById('reanalysisResult');
+    
+    resultDiv.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">재분석 중...</span>
+            </div>
+            <p class="mt-2">AI 재분석을 진행하고 있습니다...</p>
+        </div>
+    `;
+    
+    fetch(`/api/guideline-documents/${currentDocumentId}/analyze/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            analysis_type: analysisType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const result = data.result;
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle me-2"></i>재분석이 완료되었습니다!
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h6>분석 결과</h6>
+                        <p><strong>요약:</strong> ${result.summary}</p>
+                        
+                        <h6 class="mt-3">주요 포인트</h6>
+                        <ul>
+                            ${result.key_points.map(point => `<li>${point}</li>`).join('')}
+                        </ul>
+                        
+                        <h6 class="mt-3">권장사항</h6>
+                        <ul>
+                            ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <strong>위험도:</strong> 
+                                <span class="badge bg-${result.risk_level === 'high' ? 'danger' : result.risk_level === 'medium' ? 'warning' : 'success'}">
+                                    ${result.risk_level}
+                                </span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>준수 점수:</strong> ${result.compliance_score}/100
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 3초 후 페이지 새로고침
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        } else {
+            resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        }
+    })
+    .catch(error => {
+        resultDiv.innerHTML = '<div class="alert alert-danger">AI 재분석 중 오류가 발생했습니다.</div>';
+        console.error('Error:', error);
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showAlert(type, message) {
+    // 간단한 알림 함수
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // 5초 후 자동 제거
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %} 
