@@ -17,9 +17,14 @@ class ComplianceAnalyzer:
     
     def __init__(self):
         self.rules = self._load_rules_from_db()
+        print(f"[DEBUG] 로드된 규칙 수: {len(self.rules)}")
         try:
             self.keywords = self._load_keywords_from_db()
-        except:
+            print(f"[DEBUG] 로드된 키워드 카테고리: {list(self.keywords.keys())}")
+            for category, keywords in self.keywords.items():
+                print(f"[DEBUG] {category}: {len(keywords)}개 키워드")
+        except Exception as e:
+            print(f"[DEBUG] 키워드 로드 실패: {e}")
             self.keywords = {}
         try:
             self.recommended_expressions = self._load_recommended_expressions_from_db()

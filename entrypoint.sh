@@ -7,6 +7,14 @@ echo "🚀 의료광고법 준수 검토 시스템 시작..."
 echo "🗄️ 데이터베이스 마이그레이션 중..."
 python manage.py migrate
 
+# 의료광고법 규칙 로드
+echo "📋 의료광고법 규칙 로드 중..."
+python manage.py load_compliance_rules
+
+# 가이드라인 문서 로드
+echo "📚 가이드라인 문서 로드 중..."
+python manage.py load_guideline_documents
+
 # 정적 파일 수집
 echo "📁 정적 파일 수집 중..."
 python manage.py collectstatic --noinput
