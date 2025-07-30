@@ -1,8 +1,8 @@
 [phases.setup]
-nixPkgs = ["python39", "postgresql", "gcc"]
+nixPkgs = ["python39", "postgresql", "gcc", "pip"]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
+cmds = ["python -m pip install -r requirements.txt"]
 
 [phases.build]
 cmds = ["python manage.py collectstatic --noinput", "python manage.py migrate"]
