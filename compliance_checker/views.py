@@ -339,13 +339,18 @@ def analyze_url(request):
         try:
             text = WebTextExtractor.extract_from_url(url, simple_mode=simple_mode)
             
-            if not text or len(text.strip()) < 10:
+            if not text:
                 return JsonResponse({
-                    'error': '웹페이지에서 의미있는 텍스트를 추출할 수 없습니다. 다른 URL을 시도해보세요.'
+                    'error': '웹페이지에서 텍스트를 추출할 수 없습니다. 다른 URL을 시도해보세요.'
                 }, status=400)
             
             # 텍스트 정리
             text = re.sub(r'\s+', ' ', text).strip()
+            
+            if len(text.strip()) < 10:
+                return JsonResponse({
+                    'error': '웹페이지에서 의미있는 텍스트를 추출할 수 없습니다. 다른 URL을 시도해보세요.'
+                }, status=400)
             
         except Exception as e:
             logger.error(f"URL 텍스트 추출 실패: {url} - {e}")

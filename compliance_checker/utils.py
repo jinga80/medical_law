@@ -102,13 +102,19 @@ class WebTextExtractor:
 
     @staticmethod
     def _extract_simple_text(url):
-        """자바스크립트 무시, body 전체 + 주요 블록 태그 + iframe + meta/title/og:description까지 최대한 텍스트 복사"""
+        """자바스크립트 무시, body 전체 + 주요 블록 태그 + meta/title/og:description까지 최대한 텍스트 복사"""
         try:
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
-            response = requests.get(url, headers=headers, timeout=10)
+            response = requests.get(url, headers=headers, timeout=15)
             response.raise_for_status()
+            
+            # 응답이 HTML인지 확인
+            content_type = response.headers.get('content-type', '').lower()
+            if 'text/html' not in content_type and 'application/xhtml' not in content_type:
+                return f"URL에서 HTML 콘텐츠를 찾을 수 없습니다. Content-Type: {content_type}"
+            
             soup = BeautifulSoup(response.content, 'html.parser')
 
             # 1. script/style/meta/link 등 제거
@@ -175,29 +181,8 @@ class WebTextExtractor:
                 if meta.get('property') in ['og:description', 'og:title'] and meta.get('content'):
                     meta_texts.append(meta['content'].strip())
 
-            # 6. iframe 내부 텍스트 재귀적으로 합치기
-            iframe_texts = []
-            iframes = soup.find_all('iframe')
-            from urllib.parse import urljoin
-            for iframe in iframes:
-                src = iframe.get('src')
-                if src:
-                    if src.startswith('//'):
-                        src = 'https:' + src
-                    elif src.startswith('/'):
-                        src = urljoin(url, src)
-                    elif not src.startswith('http'):
-                        src = urljoin(url, src)
-                    try:
-                        inner = WebTextExtractor._extract_simple_text(src)
-                        if inner and len(inner) > 10:
-                            iframe_texts.append(inner)
-                    except Exception as e:
-                        logger.warning(f"iframe simple_mode 텍스트 추출 실패: {e}")
-                        continue
-
-            # 7. 모든 텍스트 합치기 (중복 제거)
-            all_texts = meta_texts + [body_text] + block_texts + iframe_texts
+            # 6. 모든 텍스트 합치기 (중복 제거) - iframe 제거로 안정성 향상
+            all_texts = meta_texts + [body_text] + block_texts
             # 중복 제거, 길이순 정렬(긴 것 우선)
             seen = set()
             unique_texts = []
@@ -214,7 +199,7 @@ class WebTextExtractor:
             return result.strip()
         except Exception as e:
             logger.warning(f"simple_mode 텍스트 추출 실패: {e}")
-            return None
+            return f"URL에서 텍스트를 추출할 수 없습니다: {str(e)}"
 
     @staticmethod
     def _extract_with_requests(url):
