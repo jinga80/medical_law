@@ -41,6 +41,26 @@ def test_view(request):
     """테스트 페이지 - 간단한 응답"""
     return HttpResponse("<h1>테스트 성공!</h1><p>Django가 정상적으로 작동 중입니다.</p>")
 
+def health_check(request):
+    """헬스체크 엔드포인트"""
+    try:
+        # 데이터베이스 연결 확인
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        
+        return JsonResponse({
+            'status': 'healthy',
+            'database': 'connected',
+            'timestamp': timezone.now().isoformat()
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': timezone.now().isoformat()
+        }, status=500)
+
 def dashboard(request):
     """대시보드 페이지"""
     # 최근 30일 통계

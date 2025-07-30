@@ -99,8 +99,9 @@ DATABASES = {
 # Railway/Heroku PostgreSQL 설정
 if os.getenv('DATABASE_URL'):
     DATABASES['default'] = dj_database_url.config(
-        conn_max_age=600,
+        conn_max_age=0,  # 연결을 항상 새로 생성
         conn_health_checks=True,
+        ssl_require=True,  # SSL 연결 강제
     )
 
 
@@ -147,9 +148,41 @@ STATICFILES_DIRS = [
 # WhiteNoise 설정
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# 세션 설정
+SESSION_COOKIE_AGE = 86400  # 24시간
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
+
 # Media files (Uploaded files)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# 로깅 설정
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'compliance_checker': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
