@@ -33,7 +33,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-zpn)9nnzcpn21x&9r$5=307ix!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS 설정
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'medicallaw.up.railway.app,.railway.app,localhost,127.0.0.1,0.0.0.0').split(',')
 
 # CORS 설정
 CORS_ALLOW_ALL_ORIGINS = True
