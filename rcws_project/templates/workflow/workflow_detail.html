@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ workflow.title }} - 채용 상세{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=workflow.title|add:" - 채용 상세" icon="mdi-briefcase" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-4 col-lg-5">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="header-title mb-3">채용 정보</h4>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">제목</label>
+                        <p class="text-muted">{{ workflow.title }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">설명</label>
+                        <p class="text-muted">{{ workflow.description|linebreaks }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">상태</label>
+                        <div>
+                            <span class="badge bg-{{ workflow.get_status_color }} fs-6">{{ workflow.get_status_display }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">진행률</label>
+                        <div class="progress mb-2" style="height: 10px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ workflow.progress }}%;" 
+                                 aria-valuenow="{{ workflow.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <small class="text-muted">{{ workflow.progress }}% 완료</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">우선순위</label>
+                        <div>
+                            <span class="badge bg-{{ workflow.get_priority_color }} fs-6">{{ workflow.get_priority_display }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">담당자</label>
+                        <div class="d-flex align-items-center">
+                            {% if workflow.assigned_to.profile_image %}
+                                <img src="{{ workflow.assigned_to.profile_image.url }}" alt="user" class="me-2 rounded-circle" width="40">
+                            {% else %}
+                                <div class="avatar-sm me-2 bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                                    <span class="text-white font-weight-bold">{{ workflow.assigned_to.first_name|first|upper }}</span>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <span class="text-body fw-semibold">{{ workflow.assigned_to.get_full_name }}</span>
+                                <small class="d-block text-muted">{{ workflow.assigned_to.get_role_display }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">생성일</label>
+                        <p class="text-muted">{{ workflow.created_at|date:"Y-m-d H:i" }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">마감일</label>
+                        <p class="text-muted {% if workflow.is_overdue %}text-danger{% endif %}">
+                            {{ workflow.due_date|date:"Y-m-d H:i" }}
+                            {% if workflow.is_overdue %}
+                                <span class="badge bg-danger ms-2">지연</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">수정일</label>
+                        <p class="text-muted">{{ workflow.updated_at|date:"Y-m-d H:i" }}</p>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'workflow:update' workflow.id %}" class="btn btn-primary">
+                            <i class="mdi mdi-pencil me-2"></i>채용 수정
+                        </a>
+                        <a href="#" class="btn btn-success" onclick="advanceWorkflow()">
+                            <i class="mdi mdi-arrow-right me-2"></i>다음 단계로
+                        </a>
+                        <a href="{% url 'workflow:activity' workflow.id %}" class="btn btn-info">
+                            <i class="mdi mdi-history me-2"></i>활동 로그
+                        </a>
+                        <a href="#" class="btn btn-secondary">
+                            <i class="mdi mdi-file-pdf me-2"></i>보고서 생성
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="header-title mb-3">참여자</h4>
+                    
+                    <div class="list-group list-group-flush">
+                        {% for participant in workflow.participants.all %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    {% if participant.user.profile_image %}
+                                        <img src="{{ participant.user.profile_image.url }}" alt="user" class="rounded-circle" width="32">
+                                    {% else %}
+                                        <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                                            <span class="text-white font-weight-bold">{{ participant.user.first_name|first|upper }}</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 ms-2">
+                                    <h6 class="mb-1">{{ participant.user.get_full_name }}</h6>
+                                    <small class="text-muted">{{ participant.get_role_display }}</small>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="badge bg-{{ participant.get_status_color }}">{{ participant.get_status_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-muted">
+                            참여자가 없습니다.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8 col-lg-7">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-pills nav-fill navtab-bg">
+                        <li class="nav-item">
+                            <a href="#steps" data-bs-toggle="tab" aria-expanded="true" class="nav-link active">
+                                채용 단계
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#activities" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                                활동 내역
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#documents" data-bs-toggle="tab" aria-expanded="false" class="nav-link">
+                                문서
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane show active" id="steps">
+                            <div class="timeline-alt pb-0">
+                                {% for step in workflow.steps.all %}
+                                <div class="timeline-item">
+                                    <i class="mdi mdi-circle bg-{{ step.get_status_color }} timeline-icon"></i>
+                                    <div class="timeline-item-info">
+                                        <a href="#" class="text-info fw-bold mb-1 d-block">{{ step.get_step_name_display }}</a>
+                                        <small class="text-muted">{{ step.description|default:"설명 없음" }}</small>
+                                        <p class="mb-0 pb-2">
+                                            <small class="text-muted">
+                                                {% if step.completed_at %}
+                                                    완료: {{ step.completed_at|date:"Y-m-d H:i" }}
+                                                {% else %}
+                                                    예상 완료: {{ step.due_date|date:"Y-m-d H:i"|default:"미정" }}
+                                                {% endif %}
+                                            </small>
+                                        </p>
+                                        
+                                        {% if step.assigned_to %}
+                                        <div class="d-flex align-items-center mb-2">
+                                            <small class="text-muted me-2">담당자:</small>
+                                            <div class="d-flex align-items-center">
+                                                {% if step.assigned_to.profile_image %}
+                                                    <img src="{{ step.assigned_to.profile_image.url }}" alt="user" class="rounded-circle me-1" width="24">
+                                                {% else %}
+                                                    <div class="avatar-xs bg-primary rounded-circle d-flex align-items-center justify-content-center me-1">
+                                                        <span class="text-white font-weight-bold">{{ step.assigned_to.first_name|first|upper }}</span>
+                                                    </div>
+                                                {% endif %}
+                                                <span class="text-body fw-semibold">{{ step.assigned_to.get_full_name }}</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <div class="d-flex gap-1">
+                                            {% if step.status == 'pending' %}
+                                                <button class="btn btn-sm btn-primary" onclick="startStep({{ step.id }})">시작</button>
+                                            {% elif step.status == 'in_progress' %}
+                                                <button class="btn btn-sm btn-success" onclick="completeStep({{ step.id }})">완료</button>
+                                            {% endif %}
+                                            
+                                            <a href="{% url 'workflow:step_detail' step.id %}" class="btn btn-sm btn-outline-info">
+                                                <i class="mdi mdi-eye me-1"></i>상세보기
+                                            </a>
+                                            
+
+                                            <button class="btn btn-sm btn-outline-secondary" onclick="viewStepDetail({{ step.id }})">상세</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-center text-muted py-4">
+                                    채용 단계가 없습니다.
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="activities">
+                            <div class="table-responsive">
+                                <table class="table table-centered table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>활동</th>
+                                            <th>사용자</th>
+                                            <th>시간</th>
+                                            <th>상태</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for activity in workflow.activities.all %}
+                                        <tr>
+                                            <td>
+                                                <h6 class="mb-1">{{ activity.get_activity_type_display }}</h6>
+                                                <p class="text-muted mb-0">{{ activity.description }}</p>
+                                            </td>
+                                            <td>{{ activity.user.get_full_name }}</td>
+                                            <td>{{ activity.created_at|date:"Y-m-d H:i" }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ activity.get_status_color }}">{{ activity.get_status_display }}</span>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">활동 내역이 없습니다.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="documents">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5>첨부 문서</h5>
+                                        <button class="btn btn-primary btn-sm" onclick="uploadDocument()">
+                                            <i class="mdi mdi-upload me-2"></i>문서 업로드
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-centered table-hover mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>문서명</th>
+                                                    <th>유형</th>
+                                                    <th>업로드자</th>
+                                                    <th>업로드일</th>
+                                                    <th>작업</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for document in workflow.documents.all %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="mdi mdi-file-document font-18 text-primary me-2"></i>
+                                                            <span>{{ document.title }}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>{{ document.get_document_type_display }}</td>
+                                                    <td>{{ document.uploaded_by.get_full_name }}</td>
+                                                    <td>{{ document.uploaded_at|date:"Y-m-d H:i" }}</td>
+                                                    <td>
+                                                        <a href="{{ document.file.url }}" class="action-icon" target="_blank">
+                                                            <i class="mdi mdi-download"></i>
+                                                        </a>
+                                                        <a href="#" class="action-icon" onclick="deleteDocument({{ document.id }})">
+                                                            <i class="mdi mdi-delete"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="5" class="text-center">첨부 문서가 없습니다.</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function advanceWorkflow() {
+    if (confirm('채용을 다음 단계로 진행하시겠습니까?')) {
+        fetch(`{% url 'workflow:advance' workflow.id %}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('오류가 발생했습니다.');
+            }
+        });
+    }
+}
+
+function startStep(stepId) {
+    fetch(`{% url 'workflow:step_start' 0 %}`.replace('0', stepId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('오류가 발생했습니다.');
+        }
+    });
+}
+
+function completeStep(stepId) {
+    fetch(`{% url 'workflow:step_complete' 0 %}`.replace('0', stepId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('오류가 발생했습니다.');
+        }
+    });
+}
+
+function viewStepDetail(stepId) {
+    window.location.href = `{% url 'workflow:step_detail' 0 %}`.replace('0', stepId);
+}
+
+function uploadDocument() {
+    // 문서 업로드 모달 또는 페이지로 이동
+    alert('문서 업로드 기능을 구현해주세요.');
+}
+
+function deleteDocument(documentId) {
+    if (confirm('이 문서를 삭제하시겠습니까?')) {
+        fetch(`{% url 'workflow:document_delete' 0 %}`.replace('0', documentId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('오류가 발생했습니다.');
+            }
+        });
+    }
+}
+</script>
+{% endblock %} 

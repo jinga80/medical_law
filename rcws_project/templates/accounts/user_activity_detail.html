@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}활동 상세 - {{ activity.get_activity_type_display }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"활동 상세" icon="mdi-history" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- 페이지 헤더 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="{{ activity.get_activity_icon }} text-{{ activity.get_activity_color }}"></i>
+                {{ activity.get_activity_type_display }}
+            </h1>
+            <p class="text-muted">{{ activity.user.get_full_name }}님의 활동 상세 정보</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <a href="{% url 'accounts:activity_list' %}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-arrow-left"></i> 목록으로
+            </a>
+            <a href="{% url 'accounts:my_activity_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-user"></i> 내 활동
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 활동 정보 -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">활동 정보</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>활동 유형:</strong> 
+                                <span class="badge bg-{{ activity.get_activity_color }}">
+                                    <i class="{{ activity.get_activity_icon }}"></i>
+                                    {{ activity.get_activity_type_display }}
+                                </span>
+                            </p>
+                            <p><strong>사용자:</strong> 
+                                <div class="d-flex align-items-center mt-1">
+                                    <i class="fas fa-user-circle fa-2x text-gray-300 me-2"></i>
+                                    <div>
+                                        <div class="font-weight-bold">{{ activity.user.get_full_name }}</div>
+                                        <small class="text-muted">{{ activity.user.email }}</small>
+                                    </div>
+                                </div>
+                            </p>
+                            <p><strong>활동 시간:</strong> {{ activity.created_at|date:"Y-m-d H:i:s" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>IP 주소:</strong> 
+                                {% if activity.ip_address %}
+                                    <code>{{ activity.ip_address }}</code>
+                                {% else %}
+                                    <span class="text-muted">기록되지 않음</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>관련 객체:</strong> 
+                                {% if activity.related_object_name %}
+                                    <span class="badge bg-info">{{ activity.related_object_name }}</span>
+                                {% else %}
+                                    <span class="text-muted">없음</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>객체 유형:</strong> 
+                                {% if activity.related_object_type %}
+                                    <span class="badge bg-secondary">{{ activity.related_object_type }}</span>
+                                {% else %}
+                                    <span class="text-muted">없음</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>활동 설명</h6>
+                        <div class="alert alert-{{ activity.get_activity_color }}">
+                            <i class="{{ activity.get_activity_icon }}"></i>
+                            {{ activity.description }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사용자 에이전트 정보 -->
+            {% if activity.user_agent %}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">브라우저 정보</h6>
+                </div>
+                <div class="card-body">
+                    <div class="bg-light p-3 rounded">
+                        <code class="small">{{ activity.user_agent }}</code>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 관련 정보 -->
+        <div class="col-lg-4">
+            <!-- 사용자 정보 -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">사용자 정보</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-user-circle fa-4x text-gray-300"></i>
+                    </div>
+                    <div class="text-center">
+                        <h5 class="font-weight-bold">{{ activity.user.get_full_name }}</h5>
+                        <p class="text-muted">{{ activity.user.email }}</p>
+                        <p class="small">
+                            <strong>조직:</strong> {{ activity.user.organization|default:"미지정" }}<br>
+                            <strong>역할:</strong> {{ activity.user.get_role_display }}<br>
+                            <strong>가입일:</strong> {{ activity.user.date_joined|date:"Y-m-d" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 활동 통계 -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">사용자 활동 통계</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-right">
+                                <div class="h4 font-weight-bold text-primary">{{ activity.user.activities.count }}</div>
+                                <div class="small text-muted">전체 활동</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 font-weight-bold text-success">
+                                {{ activity.user.activities.all|length }}
+                            </div>
+                            <div class="small text-muted">오늘 활동</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 빠른 링크 -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">빠른 링크</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'accounts:user_detail' activity.user.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-user"></i> 사용자 프로필
+                        </a>
+                        <a href="{% url 'accounts:my_activity_list' %}?user={{ activity.user.id }}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-history"></i> 사용자 활동 목록
+                        </a>
+                        {% if activity.related_object_id and activity.related_object_type %}
+                            <a href="#" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-external-link-alt"></i> 관련 객체 보기
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

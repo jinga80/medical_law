@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}후보자 거절 - {{ candidate.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-title-box bg-gradient-warning text-white rounded-3 shadow-sm" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <div class="page-title-left">
+                        <h2 class="page-title mb-2 fw-bold" style="font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="mdi mdi-close-circle me-3"></i>후보자 거절
+                        </h2>
+                        <ol class="breadcrumb m-0" style="font-size: 0.95rem;">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-home me-1"></i>홈
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'candidates:list' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-account-group me-1"></i>후보자 목록
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'candidates:detail' candidate.id %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-account me-1"></i>{{ candidate.name }}
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">
+                                <i class="mdi mdi-chevron-right mx-2"></i>거절
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm border-warning">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center mx-auto mb-3" 
+                             style="width: 80px; height: 80px;">
+                            <i class="mdi mdi-close text-white" style="font-size: 2rem;"></i>
+                        </div>
+                        <h4 class="mb-2 text-warning">후보자 거절</h4>
+                        <p class="text-muted">후보자를 거절하고 지원을 종료합니다.</p>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">
+                            <i class="mdi mdi-alert-circle me-1"></i>거절 안내
+                        </h6>
+                        <p class="mb-0">
+                            후보자 <strong>{{ candidate.name }}</strong>을(를) 거절하시겠습니까?
+                        </p>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="mdi mdi-account me-1"></i>거절할 후보자 정보
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>이름:</strong> {{ candidate.name }}</p>
+                                    <p class="mb-1"><strong>이메일:</strong> {{ candidate.email }}</p>
+                                    <p class="mb-1"><strong>전화번호:</strong> {{ candidate.phone|default:"-" }}</p>
+                                    <p class="mb-1"><strong>지원 직무:</strong> {{ candidate.position }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>추천자:</strong> {{ candidate.recommended_by.get_full_name }}</p>
+                                    <p class="mb-1"><strong>추천일:</strong> {{ candidate.recommended_at|date:'Y년 m월 d일' }}</p>
+                                    <p class="mb-1"><strong>현재 상태:</strong> {{ candidate.get_status_display }}</p>
+                                    <p class="mb-1"><strong>평가 점수:</strong> {{ candidate.evaluation_score|default:"-" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="rejection_reason" class="form-label">
+                                <i class="mdi mdi-comment me-1"></i>거절 사유 *
+                            </label>
+                            <select class="form-select mb-3" id="rejection_reason" name="rejection_reason" required>
+                                <option value="">거절 사유를 선택해주세요</option>
+                                <option value="qualification">자격 요건 미달</option>
+                                <option value="experience">경력 부족</option>
+                                <option value="skills">기술 스택 불일치</option>
+                                <option value="culture">조직 문화 부적합</option>
+                                <option value="position">직무 부적합</option>
+                                <option value="other">기타</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="rejection_comment" class="form-label">
+                                <i class="mdi mdi-comment-text me-1"></i>상세 사유 (선택사항)
+                            </label>
+                            <textarea class="form-control" id="rejection_comment" name="rejection_comment" rows="3" 
+                                      placeholder="거절 사유에 대한 상세 설명을 입력해주세요..."></textarea>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="mdi mdi-information me-1"></i>거절 시 진행사항
+                            </h6>
+                            <ul class="mb-0 small">
+                                <li>후보자 상태가 '거절됨'으로 변경됩니다.</li>
+                                <li>관련 채용이 종료됩니다.</li>
+                                <li>후보자에게 거절 알림이 발송됩니다.</li>
+                                <li>추천자에게 거절 통보가 발송됩니다.</li>
+                            </ul>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- 버튼 -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{% url 'candidates:detail' candidate.id %}" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-arrow-left me-1"></i>취소
+                                </a>
+                                <a href="{% url 'candidates:list' %}" class="btn btn-outline-info ms-2">
+                                    <i class="mdi mdi-account-group me-1"></i>후보자 목록
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="mdi mdi-close me-1"></i>거절 확인
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    border: none;
+    color: #000;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #e0a800 0%, #e8590c 100%);
+    transform: translateY(-1px);
+    color: #000;
+}
+
+.card.border-warning {
+    border-width: 2px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rejectionReason = document.getElementById('rejection_reason');
+    const rejectionComment = document.getElementById('rejection_comment');
+    
+    rejectionReason.addEventListener('change', function() {
+        if (this.value === 'other') {
+            rejectionComment.required = true;
+            rejectionComment.placeholder = '기타 사유를 상세히 입력해주세요...';
+        } else {
+            rejectionComment.required = false;
+            rejectionComment.placeholder = '거절 사유에 대한 상세 설명을 입력해주세요...';
+        }
+    });
+});
+</script>
+{% endblock %} 

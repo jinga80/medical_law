@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}자주 묻는 질문 - RCWS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-title-box bg-gradient-warning text-white rounded-3 shadow-sm" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <div class="page-title-left">
+                        <h2 class="page-title mb-2 fw-bold" style="font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="mdi mdi-frequently-asked-questions me-3"></i>자주 묻는 질문
+                        </h2>
+                        <ol class="breadcrumb m-0" style="font-size: 0.95rem;">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dashboard:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-home me-1"></i>홈
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'help:main' %}" class="text-white-75 text-decoration-none">
+                                    <i class="mdi mdi-help-circle me-1"></i>사용 설명서
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">
+                                <i class="mdi mdi-chevron-right mx-2"></i>FAQ
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- FAQ 검색 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="mdi mdi-magnify"></i>
+                        </span>
+                        <input type="text" class="form-control" id="faqSearch" placeholder="질문을 검색해보세요...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 카테고리별 -->
+            <div class="accordion" id="faqAccordion">
+                <!-- 계정 관련 FAQ -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white" id="accountHeading">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link text-white text-decoration-none w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#accountCollapse">
+                                <i class="mdi mdi-account me-2"></i>계정 및 로그인
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="accountCollapse" class="collapse show" data-bs-parent="#faqAccordion">
+                        <div class="card-body">
+                            <div class="faq-item mb-4">
+                                <h6 class="text-primary mb-2">Q: 비밀번호를 잊어버렸어요</h6>
+                                <p class="text-muted mb-0">A: 관리자에게 문의하여 비밀번호를 재설정하세요. 보안을 위해 직접적인 비밀번호 변경은 불가능합니다.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-primary mb-2">Q: 계정이 잠겼어요</h6>
+                                <p class="text-muted mb-0">A: 여러 번의 로그인 실패로 계정이 잠겼을 수 있습니다. 관리자에게 문의하여 계정을 해제하세요.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-primary mb-2">Q: 권한이 부족해요</h6>
+                                <p class="text-muted mb-0">A: 필요한 권한이 있다면 관리자에게 요청하세요. 업무에 필요한 최소한의 권한만 부여됩니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 후보자 관리 FAQ -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-success text-white" id="candidateHeading">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link text-white text-decoration-none w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#candidateCollapse">
+                                <i class="mdi mdi-account-group me-2"></i>후보자 관리
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="candidateCollapse" class="collapse" data-bs-parent="#faqAccordion">
+                        <div class="card-body">
+                            <div class="faq-item mb-4">
+                                <h6 class="text-success mb-2">Q: 후보자를 어떻게 승인하나요?</h6>
+                                <p class="text-muted mb-0">A: 후보자 상세 페이지에서 "승인" 버튼을 클릭하세요. 승인 후 평가 단계로 자동 진행됩니다.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-success mb-2">Q: 중복 지원자를 어떻게 처리하나요?</h6>
+                                <p class="text-muted mb-0">A: 시스템에서 자동으로 중복 지원을 감지합니다. 기존 지원 정보를 확인하고 통합 관리하세요.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-success mb-2">Q: 파일 업로드가 안 돼요</h6>
+                                <p class="text-muted mb-0">A: 파일 크기(최대 10MB)와 형식(PDF, JPG, PNG)을 확인해주세요. 브라우저 설정도 확인해보세요.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 평가 관리 FAQ -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-danger text-white" id="evaluationHeading">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link text-white text-decoration-none w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#evaluationCollapse">
+                                <i class="mdi mdi-clipboard-check me-2"></i>평가 관리
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="evaluationCollapse" class="collapse" data-bs-parent="#faqAccordion">
+                        <div class="card-body">
+                            <div class="faq-item mb-4">
+                                <h6 class="text-danger mb-2">Q: 평가 점수는 어떻게 매기나요?</h6>
+                                <p class="text-muted mb-0">A: 각 평가 항목별로 1-5점을 매기고, 객관적인 기준에 따라 평가하세요. 구체적인 예시와 함께 의견을 작성하는 것이 좋습니다.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-danger mb-2">Q: 평가 결과를 수정할 수 있나요?</h6>
+                                <p class="text-muted mb-0">A: 평가 완료 전까지는 수정 가능합니다. 완료 후에는 관리자에게 문의하세요.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-danger mb-2">Q: 평가 권한이 없어요</h6>
+                                <p class="text-muted mb-0">A: 평가자 권한이 필요합니다. 관리자에게 권한 요청을 하세요.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 채용 FAQ -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-info text-white" id="workflowHeading">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link text-white text-decoration-none w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#workflowCollapse">
+                                <i class="mdi mdi-workflow me-2"></i>채용
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="workflowCollapse" class="collapse" data-bs-parent="#faqAccordion">
+                        <div class="card-body">
+                            <div class="faq-item mb-4">
+                                <h6 class="text-info mb-2">Q: 채용 상태를 변경할 수 있나요?</h6>
+                                <p class="text-muted mb-0">A: 담당자라면 채용 상태를 변경할 수 있습니다. 상세 페이지에서 상태 변경 버튼을 사용하세요.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-info mb-2">Q: 채용 마감일을 연장할 수 있나요?</h6>
+                                <p class="text-muted mb-0">A: 채용 편집에서 마감일을 수정할 수 있습니다. 변경 사유를 메모에 기록하세요.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-info mb-2">Q: 알림이 오지 않아요</h6>
+                                <p class="text-muted mb-0">A: 알림 설정을 확인하고 브라우저 알림 권한을 허용해주세요.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 보고서 FAQ -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-secondary text-white" id="reportHeading">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link text-white text-decoration-none w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#reportCollapse">
+                                <i class="mdi mdi-chart-bar me-2"></i>보고서
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="reportCollapse" class="collapse" data-bs-parent="#faqAccordion">
+                        <div class="card-body">
+                            <div class="faq-item mb-4">
+                                <h6 class="text-secondary mb-2">Q: 보고서가 생성되지 않아요</h6>
+                                <p class="text-muted mb-0">A: 필수 설정을 모두 완료했는지 확인하고 다시 시도해보세요. 데이터가 없는 경우에도 생성되지 않을 수 있습니다.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-secondary mb-2">Q: 데이터가 부정확해요</h6>
+                                <p class="text-muted mb-0">A: 필터 조건과 분석 기간을 확인해보세요. 정확한 데이터를 위해 조건을 조정하세요.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-secondary mb-2">Q: 내보내기가 안 돼요</h6>
+                                <p class="text-muted mb-0">A: 브라우저 설정을 확인하고 팝업 차단을 해제해보세요. 파일 크기가 큰 경우 시간이 걸릴 수 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 시스템 FAQ -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-warning text-white" id="systemHeading">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link text-white text-decoration-none w-100 text-start collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#systemCollapse">
+                                <i class="mdi mdi-cog me-2"></i>시스템
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="systemCollapse" class="collapse" data-bs-parent="#faqAccordion">
+                        <div class="card-body">
+                            <div class="faq-item mb-4">
+                                <h6 class="text-warning mb-2">Q: 페이지가 로드되지 않아요</h6>
+                                <p class="text-muted mb-0">A: 브라우저를 새로고침하거나 다시 로그인해보세요. 인터넷 연결도 확인해주세요.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-warning mb-2">Q: 데이터가 저장되지 않아요</h6>
+                                <p class="text-muted mb-0">A: 필수 입력 항목을 모두 입력했는지 확인하고 다시 시도해보세요.</p>
+                            </div>
+                            <div class="faq-item mb-4">
+                                <h6 class="text-warning mb-2">Q: 시스템이 느려요</h6>
+                                <p class="text-muted mb-0">A: 브라우저 캐시를 정리하거나 다른 브라우저를 사용해보세요. 시스템 점검 중일 수 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사이드바 -->
+        <div class="col-lg-4">
+            <!-- 빠른 링크 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-link me-2"></i>빠른 링크
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'help:main' %}" class="btn btn-outline-warning btn-sm">
+                            <i class="mdi mdi-help-circle me-2"></i>도움말 메인
+                        </a>
+                        <a href="{% url 'help:contact' %}" class="btn btn-outline-info btn-sm">
+                            <i class="mdi mdi-email me-2"></i>문의하기
+                        </a>
+                        <a href="{% url 'dashboard:main' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="mdi mdi-view-dashboard me-2"></i>대시보드
+                        </a>
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-success btn-sm">
+                            <i class="mdi mdi-account me-2"></i>내 프로필
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 카테고리별 FAQ -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-format-list-bulleted me-2"></i>FAQ 카테고리
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="#accountCollapse" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#accountCollapse">
+                            <i class="mdi mdi-account text-primary me-2"></i>
+                            <span>계정 및 로그인</span>
+                        </a>
+                        <a href="#candidateCollapse" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#candidateCollapse">
+                            <i class="mdi mdi-account-group text-success me-2"></i>
+                            <span>후보자 관리</span>
+                        </a>
+                        <a href="#evaluationCollapse" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#evaluationCollapse">
+                            <i class="mdi mdi-clipboard-check text-danger me-2"></i>
+                            <span>평가 관리</span>
+                        </a>
+                        <a href="#workflowCollapse" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#workflowCollapse">
+                            <i class="mdi mdi-workflow text-info me-2"></i>
+                            <span>채용</span>
+                        </a>
+                        <a href="#reportCollapse" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#reportCollapse">
+                            <i class="mdi mdi-chart-bar text-secondary me-2"></i>
+                            <span>보고서</span>
+                        </a>
+                        <a href="#systemCollapse" class="list-group-item list-group-item-action d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#systemCollapse">
+                            <i class="mdi mdi-cog text-warning me-2"></i>
+                            <span>시스템</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 문의하기 -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="mdi mdi-help-circle me-2"></i>추가 도움이 필요하신가요?
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">
+                        위 FAQ에서 답을 찾지 못하셨다면, 언제든 문의해주세요.
+                    </p>
+                    <a href="{% url 'help:contact' %}" class="btn btn-outline-info btn-sm w-100">
+                        <i class="mdi mdi-email me-1"></i>문의하기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.btn-outline-warning:hover,
+.btn-outline-info:hover,
+.btn-outline-primary:hover,
+.btn-outline-success:hover {
+    transform: translateY(-1px);
+}
+
+.faq-item {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 1rem;
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.list-group-item {
+    border: none;
+    padding: 0.75rem 0;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // FAQ 검색 기능
+    const searchInput = document.getElementById('faqSearch');
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        faqItems.forEach(item => {
+            const question = item.querySelector('h6').textContent.toLowerCase();
+            const answer = item.querySelector('p').textContent.toLowerCase();
+            
+            if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                item.style.display = 'block';
+                // 부모 아코디언을 펼치기
+                const accordionItem = item.closest('.collapse');
+                if (accordionItem && !accordionItem.classList.contains('show')) {
+                    accordionItem.classList.add('show');
+                }
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}성과 보고서{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-flex align-items-center justify-content-between">
+                <h4 class="mb-0">성과 보고서</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:main' %}">대시보드</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'reports:report_list' %}">보고서 목록</a></li>
+                        <li class="breadcrumb-item active">성과 보고서</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">총 후보자</p>
+                            <h4 class="mb-0">{{ total_candidates }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-primary align-self-center overflow-hidden">
+                                <span class="avatar-title">
+                                    <i class="mdi mdi-account-multiple font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">활성 후보자</p>
+                            <h4 class="mb-0">{{ active_candidates }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-success align-self-center overflow-hidden">
+                                <span class="avatar-title">
+                                    <i class="mdi mdi-account-check font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">채용 완료</p>
+                            <h4 class="mb-0">{{ hired_candidates }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-warning align-self-center overflow-hidden">
+                                <span class="avatar-title">
+                                    <i class="mdi mdi-account-star font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">완료된 채용</p>
+                            <h4 class="mb-0">{{ completed_workflows }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-info align-self-center overflow-hidden">
+                                <span class="avatar-title">
+                                    <i class="mdi mdi-check-circle font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">성과 요약</h5>
+                    <p class="card-text">전체 시스템의 성과 현황을 보여줍니다.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>채용 요청 현황</h6>
+                            <p>총 채용 요청: {{ total_job_requests }}건</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>평가 현황</h6>
+                            <p>총 평가: {{ total_evaluations }}건</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

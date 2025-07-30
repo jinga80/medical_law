@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load workflow_extras %}
+
+{% block title %}{{ step.name }} - 채용 단계{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container-fluid">
+    <!-- 페이지 헤더 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-tasks text-primary"></i>
+                {{ step.name }}
+            </h1>
+            <p class="text-muted">{{ step.workflow.title }}의 채용 단계</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <div class="me-3">
+                <span class="badge bg-{{ step.get_status_color }} fs-6">
+                    {{ step.get_status_display }}
+                </span>
+            </div>
+            <a href="{% url 'workflow:detail' step.workflow.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> 채용으로 돌아가기
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 단계 정보 -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">단계 정보</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>단계명:</strong> {{ step.name }}</p>
+                            <p><strong>상태:</strong> 
+                                <span class="badge bg-{{ step.get_status_color }}">
+                                    {{ step.get_status_display }}
+                                </span>
+                            </p>
+                            <p><strong>담당자:</strong> 
+                                {% if step.assigned_to %}
+                                    {{ step.assigned_to.get_full_name }}
+                                {% else %}
+                                    <span class="text-muted">미지정</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>순서:</strong> {{ step.order }}</p>
+                            <p><strong>마감일:</strong> 
+                                {% if step.due_date %}
+                                    {{ step.due_date|date:"Y-m-d H:i" }}
+                                    {% if step.is_overdue %}
+                                        <span class="badge bg-danger ms-2">지연</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">미설정</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>시작일:</strong> 
+                                {% if step.started_at %}
+                                    {{ step.started_at|date:"Y-m-d H:i" }}
+                                {% else %}
+                                    <span class="text-muted">미시작</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {% if step.description %}
+                    <div class="mt-3">
+                        <h6>설명</h6>
+                        <p>{{ step.description|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 메모 섹션 -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">메모</h6>
+                </div>
+                <div class="card-body">
+                    {% if step.notes %}
+                        <p>{{ step.notes|linebreaks }}</p>
+                    {% else %}
+                        <p class="text-muted">메모가 없습니다.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 작업 패널 -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">작업</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if step.status == 'pending' %}
+                            <button class="btn btn-primary" onclick="startStep()">
+                                <i class="fas fa-play"></i> 시작하기
+                            </button>
+                        {% elif step.status == 'in_progress' %}
+                            <button class="btn btn-success" onclick="completeStep()">
+                                <i class="fas fa-check"></i> 완료하기
+                            </button>
+                            <button class="btn btn-warning" onclick="holdStep()">
+                                <i class="fas fa-pause"></i> 보류하기
+                            </button>
+                        {% elif step.status == 'on_hold' %}
+                            <button class="btn btn-primary" onclick="resumeStep()">
+                                <i class="fas fa-play"></i> 재개하기
+                            </button>
+                        {% endif %}
+                        
+                        {% if step.status != 'completed' %}
+                            <button class="btn btn-danger" onclick="cancelStep()">
+                                <i class="fas fa-times"></i> 취소하기
+                            </button>
+                        {% endif %}
+                        
+                        <!-- 되돌리기 버튼 -->
+                        {% if step.can_revert_status %}
+                            <button class="btn btn-warning" onclick="revertStep()">
+                                <i class="fas fa-undo"></i> 되돌리기
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 진행 상황 -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">진행 상황</h6>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3">
+                        {% if step.status == 'completed' %}
+                            <div class="progress-bar bg-success" style="width: 100%">100%</div>
+                        {% elif step.status == 'in_progress' %}
+                            <div class="progress-bar bg-primary" style="width: 50%">50%</div>
+                        {% elif step.status == 'on_hold' %}
+                            <div class="progress-bar bg-warning" style="width: 30%">30%</div>
+                        {% else %}
+                            <div class="progress-bar bg-secondary" style="width: 0%">0%</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="small text-muted">
+                        <p><strong>생성일:</strong> {{ step.created_at|date:"Y-m-d H:i" }}</p>
+                        <p><strong>수정일:</strong> {{ step.updated_at|date:"Y-m-d H:i" }}</p>
+                        {% if step.completed_at %}
+                            <p><strong>완료일:</strong> {{ step.completed_at|date:"Y-m-d H:i" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상태 히스토리 -->
+            {% if step.status_history %}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">상태 변경 히스토리</h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for history in step.status_history %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-{{ history.new_status|status_color }}"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            {% if history.old_status %}
+                                                {{ history.old_status|status_display }} → {{ history.new_status|status_display }}
+                                            {% else %}
+                                                {{ history.new_status|status_display }}
+                                            {% endif %}
+                                        </h6>
+                                        <small class="text-muted">{{ history.changed_at|date:"Y-m-d H:i" }}</small>
+                                    </div>
+                                    {% if history.changed_by %}
+                                        <small class="text-muted">
+                                            <i class="fas fa-user"></i> 
+                                            {% for user in users %}
+                                                {% if user.id == history.changed_by %}
+                                                    {{ user.get_full_name }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 상태 변경 모달 -->
+<div class="modal fade" id="statusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">상태 변경</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="statusMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusChange">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e3e6f0;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #e3e6f0;
+}
+
+.timeline-content {
+    background: #f8f9fc;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 3px solid #4e73df;
+}
+
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+</style>
+
+<script>
+let currentAction = '';
+
+function startStep() {
+    currentAction = 'start';
+    document.getElementById('statusMessage').textContent = '이 단계를 시작하시겠습니까?';
+    new bootstrap.Modal(document.getElementById('statusModal')).show();
+}
+
+function completeStep() {
+    currentAction = 'complete';
+    document.getElementById('statusMessage').textContent = '이 단계를 완료하시겠습니까?';
+    new bootstrap.Modal(document.getElementById('statusModal')).show();
+}
+
+function holdStep() {
+    currentAction = 'hold';
+    document.getElementById('statusMessage').textContent = '이 단계를 보류하시겠습니까?';
+    new bootstrap.Modal(document.getElementById('statusModal')).show();
+}
+
+function resumeStep() {
+    currentAction = 'resume';
+    document.getElementById('statusMessage').textContent = '이 단계를 재개하시겠습니까?';
+    new bootstrap.Modal(document.getElementById('statusModal')).show();
+}
+
+function cancelStep() {
+    currentAction = 'cancel';
+    document.getElementById('statusMessage').textContent = '이 단계를 취소하시겠습니까?';
+    new bootstrap.Modal(document.getElementById('statusModal')).show();
+}
+
+function revertStep() {
+    currentAction = 'revert';
+    document.getElementById('statusMessage').textContent = '이전 상태로 되돌리시겠습니까?';
+    new bootstrap.Modal(document.getElementById('statusModal')).show();
+}
+
+document.getElementById('confirmStatusChange').addEventListener('click', function() {
+    const statusMap = {
+        'start': 'in_progress',
+        'complete': 'completed',
+        'hold': 'on_hold',
+        'resume': 'in_progress',
+        'cancel': 'cancelled',
+        'revert': 'pending'
+    };
+    
+    const newStatus = statusMap[currentAction];
+    
+    if (currentAction === 'revert') {
+        // 되돌리기 요청
+        fetch(`{% url 'workflow:step_revert' step.id %}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('되돌리기에 실패했습니다: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('오류가 발생했습니다.');
+        });
+    } else {
+        // 일반 상태 변경 요청
+        fetch(`{% url 'workflow:step_update_status' step.id %}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('상태 변경에 실패했습니다.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('오류가 발생했습니다.');
+        });
+    }
+});
+</script>
+{% endblock %} 

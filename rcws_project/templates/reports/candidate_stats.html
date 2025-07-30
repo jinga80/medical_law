@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}후보자 통계{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-flex align-items-center justify-content-between">
+                <h4 class="mb-0">후보자 통계</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:main' %}">대시보드</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'reports:report_list' %}">보고서 목록</a></li>
+                        <li class="breadcrumb-item active">후보자 통계</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">총 후보자</p>
+                            <h4 class="mb-0">{{ total_candidates }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-primary align-self-center overflow-hidden">
+                                <span class="avatar-title">
+                                    <i class="mdi mdi-account-multiple font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Analysis -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">상태별 후보자 현황</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>진행 상태</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>추천완료:</strong> {{ candidates_by_status.recommended }}명</li>
+                                <li><strong>서류검토중:</strong> {{ candidates_by_status.document_review }}명</li>
+                                <li><strong>서류합격:</strong> {{ candidates_by_status.document_passed }}명</li>
+                                <li><strong>서류불합격:</strong> {{ candidates_by_status.document_failed }}명</li>
+                                <li><strong>면접예정:</strong> {{ candidates_by_status.interview_scheduled }}명</li>
+                                <li><strong>면접완료:</strong> {{ candidates_by_status.interviewed }}명</li>
+                                <li><strong>최종합격:</strong> {{ candidates_by_status.final_passed }}명</li>
+                                <li><strong>최종불합격:</strong> {{ candidates_by_status.final_failed }}명</li>
+                                <li><strong>입사확정:</strong> {{ candidates_by_status.hired }}명</li>
+                                <li><strong>지원철회:</strong> {{ candidates_by_status.withdrawn }}명</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>학력별 분포</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>고등학교:</strong> {{ candidates_by_education.high_school }}명</li>
+                                <li><strong>전문대학:</strong> {{ candidates_by_education.college }}명</li>
+                                <li><strong>대학교:</strong> {{ candidates_by_education.university }}명</li>
+                                <li><strong>대학원:</strong> {{ candidates_by_education.graduate }}명</li>
+                                <li><strong>박사:</strong> {{ candidates_by_education.phd }}명</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

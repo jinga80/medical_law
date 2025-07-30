@@ -1,0 +1,1006 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load workflow_extras %}
+
+{% block title %}대시보드{% endblock %}
+
+{% block extra_css %}
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.1);
+        clip-path: polygon(0 0, 100% 0, 100% 30%, 0 70%);
+    }
+    
+    .process-stage {
+        background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        border-left: 4px solid #007bff;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .process-stage:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transform: translateY(-3px);
+    }
+    
+    .process-stage::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
+        transform: scaleX(0);
+        transition: transform 0.6s ease;
+    }
+    
+    .process-stage:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stage-icon {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0, 123, 255, 0.3);
+    }
+    
+    .process-stage:hover .stage-icon {
+        transform: scale(1.05) rotate(3deg);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+    }
+    
+    .stage-icon.active {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        animation: pulse 2s infinite;
+    }
+    
+    .stage-icon.processing {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        animation: spin 2s linear infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .process-stage h6 {
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 15px;
+        position: relative;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .process-stage h6::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 30px;
+        height: 2px;
+        background: #007bff;
+        transition: width 0.3s ease;
+    }
+    
+    .process-stage:hover h6::after {
+        width: 50px;
+    }
+    
+    /* 프로세스 스테이지별 색상 테마 */
+    .process-stage[data-stage="job_request"] {
+        border-left-color: #007bff;
+        background: linear-gradient(145deg, #ffffff 0%, #f0f8ff 100%);
+    }
+    
+    .process-stage[data-stage="job_request"] .stage-icon {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+    
+    .process-stage[data-stage="request_review"] {
+        border-left-color: #6f42c1;
+        background: linear-gradient(145deg, #ffffff 0%, #f8f5ff 100%);
+    }
+    
+    .process-stage[data-stage="request_review"] .stage-icon {
+        background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+    }
+    
+    .process-stage[data-stage="candidate_recommendation"] {
+        border-left-color: #fd7e14;
+        background: linear-gradient(145deg, #ffffff 0%, #fff8f0 100%);
+    }
+    
+    .process-stage[data-stage="candidate_recommendation"] .stage-icon {
+        background: linear-gradient(135deg, #fd7e14 0%, #e8690b 100%);
+    }
+    
+    .process-stage[data-stage="candidate_review"] {
+        border-left-color: #20c997;
+        background: linear-gradient(145deg, #ffffff 0%, #f0fffd 100%);
+    }
+    
+    .process-stage[data-stage="candidate_review"] .stage-icon {
+        background: linear-gradient(135deg, #20c997 0%, #1ba085 100%);
+    }
+    
+    .process-stage[data-stage="interview"] {
+        border-left-color: #e83e8c;
+        background: linear-gradient(145deg, #ffffff 0%, #fff0f8 100%);
+    }
+    
+    .process-stage[data-stage="interview"] .stage-icon {
+        background: linear-gradient(135deg, #e83e8c 0%, #d63384 100%);
+    }
+    
+    .process-stage[data-stage="final_decision"] {
+        border-left-color: #dc3545;
+        background: linear-gradient(145deg, #ffffff 0%, #fff0f0 100%);
+    }
+    
+    .process-stage[data-stage="final_decision"] .stage-icon {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+    
+    .process-stage[data-stage="hiring_complete"] {
+        border-left-color: #28a745;
+        background: linear-gradient(145deg, #ffffff 0%, #f0fff0 100%);
+    }
+    
+    .process-stage[data-stage="hiring_complete"] .stage-icon {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    }
+    
+    /* 통계 숫자 스타일 개선 */
+    .process-stage .stat-number {
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+    
+    .process-stage small {
+        font-weight: 500;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid #28a745;
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    
+    .activity-timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .activity-timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+    }
+    
+    .activity-item {
+        position: relative;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .activity-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .activity-item::before {
+        content: '';
+        position: absolute;
+        left: -22px;
+        top: 20px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #007bff;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #007bff;
+    }
+    
+    .progress-ring {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+    
+    .progress-ring circle {
+        fill: none;
+        stroke-width: 8;
+        stroke-linecap: round;
+    }
+    
+    .progress-ring .bg {
+        stroke: #e9ecef;
+    }
+    
+    .progress-ring .progress {
+        stroke: #007bff;
+        stroke-dasharray: 283;
+        stroke-dashoffset: 283;
+        transition: stroke-dashoffset 0.5s ease;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 20px 0;
+    }
+    
+    .quick-action {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .quick-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    
+    .quick-action i {
+        font-size: 1.5rem;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+    
+    .quick-action h6 {
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+        font-size: 1rem;
+    }
+    
+    .quick-action small {
+        font-weight: 500;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+    
+    /* 실시간 업데이트 애니메이션 */
+    .live-update {
+        animation: liveUpdate 0.5s ease-in-out;
+    }
+    
+    @keyframes liveUpdate {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    /* 프로세스 진행 상태 표시 */
+    .process-status {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #6c757d;
+    }
+    
+    .process-status.active {
+        background: #28a745;
+        animation: blink 1.5s infinite;
+    }
+    
+    .process-status.processing {
+        background: #ffc107;
+        animation: blink 1s infinite;
+    }
+    
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
+    }
+    
+    /* 통계 숫자 애니메이션 */
+    .stat-number {
+        transition: all 0.3s ease;
+    }
+    
+    .stat-number.updated {
+        animation: numberUpdate 0.6s ease-in-out;
+    }
+    
+    @keyframes numberUpdate {
+        0% { transform: scale(1); color: inherit; }
+        50% { transform: scale(1.1); color: #007bff; }
+        100% { transform: scale(1); color: inherit; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 환영 메시지 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="stats-card">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h3 class="mb-2">안녕하세요, {{ user.get_full_name }}님!</h3>
+                        <p class="mb-0 opacity-75">
+                            {% if user.is_hospital_user %}
+                                오늘도 좋은 인재를 만나보세요.
+                            {% elif user.is_headhunting_user %}
+                                최고의 후보자를 추천해보세요.
+                            {% else %}
+                                시스템을 효율적으로 관리해보세요.
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <h2 class="mb-0">{{ stats.new_notifications }}</h2>
+                        <small>새로운 알림</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 주요 통계 -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="metric-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1" style="font-weight: 700; color: #1a1a1a;">{{ stats.total_workflows }}</h4>
+                        <p class="text-muted mb-0" style="font-weight: 500;">전체 워크플로우</p>
+                    </div>
+                    <div class="text-primary">
+                        <i class="fas fa-project-diagram" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="metric-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1" style="font-weight: 700; color: #1a1a1a;">{{ stats.total_candidates }}</h4>
+                        <p class="text-muted mb-0" style="font-weight: 500;">전체 후보자</p>
+                    </div>
+                    <div class="text-success">
+                        <i class="fas fa-users" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="metric-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1" style="font-weight: 700; color: #1a1a1a;">{{ stats.active_workflows }}</h4>
+                        <p class="text-muted mb-0" style="font-weight: 500;">진행 중인 워크플로우</p>
+                    </div>
+                    <div class="text-warning">
+                        <i class="fas fa-clock" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="metric-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1" style="font-weight: 700; color: #1a1a1a;">{{ stats.completed_workflows }}</h4>
+                        <p class="text-muted mb-0" style="font-weight: 500;">완료된 워크플로우</p>
+                    </div>
+                    <div class="text-info">
+                        <i class="fas fa-check-circle" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 전체 채용 프로세스 현황 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>전체 채용 프로세스 현황
+                        <small class="text-muted ms-2">실시간 업데이트</small>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="process-stages">
+                        {% for stage in process_overview.stages %}
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="process-stage" data-stage="{{ stage.key }}">
+                                <div class="process-status"></div>
+                                <div class="stage-icon">
+                                    {% if stage.key == 'job_request' %}
+                                        <i class="fas fa-file-alt"></i>
+                                    {% elif stage.key == 'request_review' %}
+                                        <i class="fas fa-clipboard-check"></i>
+                                    {% elif stage.key == 'candidate_recommendation' %}
+                                        <i class="fas fa-users"></i>
+                                    {% elif stage.key == 'candidate_review' %}
+                                        <i class="fas fa-user-check"></i>
+                                    {% elif stage.key == 'interview' %}
+                                        <i class="fas fa-user-friends"></i>
+                                    {% elif stage.key == 'final_decision' %}
+                                        <i class="fas fa-flag-checkered"></i>
+                                    {% elif stage.key == 'hiring_complete' %}
+                                        <i class="fas fa-user-tie"></i>
+                                    {% else %}
+                                        <i class="fas fa-cog"></i>
+                                    {% endif %}
+                                </div>
+                                <h6 class="mb-2">{{ stage.name }}</h6>
+                                {% with stage_data=process_overview|get_item:stage.key %}
+                                {% if stage_data %}
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <h4 class="text-primary mb-0 stat-number" data-stat="total">{{ stage_data.total|default:0 }}</h4>
+                                            <small class="text-muted">전체</small>
+                                        </div>
+                                        <div class="col-6">
+                                            {% if stage.key == 'job_request' %}
+                                                <h4 class="text-success mb-0 stat-number" data-stat="completed">{{ stage_data.completed|default:0 }}</h4>
+                                                <small class="text-muted">완료</small>
+                                            {% elif stage.key == 'candidate_recommendation' %}
+                                                <h4 class="text-warning mb-0 stat-number" data-stat="waiting">{{ stage_data.waiting|default:0 }}</h4>
+                                                <small class="text-muted">대기</small>
+                                            {% elif stage.key == 'candidate_review' %}
+                                                <h4 class="text-info mb-0 stat-number" data-stat="passed">{{ stage_data.passed|default:0 }}</h4>
+                                                <small class="text-muted">합격</small>
+                                            {% elif stage.key == 'interview' %}
+                                                <h4 class="text-primary mb-0 stat-number" data-stat="completed">{{ stage_data.completed|default:0 }}</h4>
+                                                <small class="text-muted">완료</small>
+                                            {% elif stage.key == 'final_decision' %}
+                                                <h4 class="text-success mb-0 stat-number" data-stat="hired">{{ stage_data.hired|default:0 }}</h4>
+                                                <small class="text-muted">채용</small>
+                                            {% elif stage.key == 'hiring_complete' %}
+                                                <h4 class="text-success mb-0 stat-number" data-stat="total_hired">{{ stage_data.total_hired|default:0 }}</h4>
+                                                <small class="text-muted">채용완료</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 성과 지표 -->
+        <div class="col-xl-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-chart-line me-2"></i>성과 지표
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="progress-ring">
+                                <svg width="120" height="120">
+                                    <circle class="bg" cx="60" cy="60" r="45"></circle>
+                                    <circle class="progress" cx="60" cy="60" r="45" 
+                                            data-progress="{{ performance_metrics.completion_rate }}"></circle>
+                                </svg>
+                            </div>
+                            <h6 class="mt-2">채용 완료율</h6>
+                            <h4 class="text-primary">{{ performance_metrics.completion_rate }}%</h4>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="progress-ring">
+                                <svg width="120" height="120">
+                                    <circle class="bg" cx="60" cy="60" r="45"></circle>
+                                    <circle class="progress" cx="60" cy="60" r="45" 
+                                            data-progress="{{ performance_metrics.candidate_pass_rate }}"></circle>
+                                </svg>
+                            </div>
+                            <h6 class="mt-2">후보자 합격율</h6>
+                            <h4 class="text-success">{{ performance_metrics.candidate_pass_rate }}%</h4>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-info">{{ performance_metrics.avg_hiring_days }}</h5>
+                                <small class="text-muted">평균 채용 기간 (일)</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-warning">{{ performance_metrics.avg_response_days }}</h5>
+                                <small class="text-muted">평균 응답 시간 (일)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 최근 활동 -->
+        <div class="col-xl-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="mdi mdi-history me-2"></i>최근 활동
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="activity-timeline">
+                        {% for activity in recent_activities %}
+                        <div class="activity-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ activity.get_activity_type_display }}</h6>
+                                    <p class="text-muted mb-1">{{ activity.description }}</p>
+                                    <small class="text-muted">{{ activity.created_at|timesince }} 전</small>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">{{ activity.created_at|date:'m/d H:i' }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <i class="mdi mdi-information-outline text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">최근 활동이 없습니다.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 역할별 대시보드 -->
+    {% if user.is_hospital_user %}
+    <!-- 병원 사용자 대시보드 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">
+                <i class="mdi mdi-hospital-building me-2"></i>병원 대시보드
+            </h5>
+        </div>
+        
+        <!-- 진행 중인 채용 요청 -->
+        <div class="col-xl-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">진행 중인 채용 요청</h6>
+                </div>
+                <div class="card-body">
+                    {% for request in dashboard_data.active_requests %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 border-bottom">
+                        <div>
+                            <h6 class="mb-1">{{ request.title }}</h6>
+                            <small class="text-muted">{{ request.position }}</small>
+                        </div>
+                        <span class="badge bg-{{ request.get_status_color }}">{{ request.get_status_display }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">진행 중인 채용 요청이 없습니다.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- 검토 대기 후보자 -->
+        <div class="col-xl-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">검토 대기 후보자</h6>
+                </div>
+                <div class="card-body">
+                    {% for candidate in dashboard_data.pending_reviews %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 border-bottom">
+                        <div>
+                            <h6 class="mb-1">{{ candidate.name }}</h6>
+                            <small class="text-muted">{{ candidate.get_position_display }}</small>
+                        </div>
+                        <a href="{% url 'candidates:review' candidate.id %}" class="btn btn-sm btn-primary">
+                            검토하기
+                        </a>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">검토 대기 후보자가 없습니다.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% elif user.is_headhunting_user %}
+    <!-- 헤드헌팅 사용자 대시보드 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">
+                <i class="mdi mdi-account-search me-2"></i>헤드헌팅 대시보드
+            </h5>
+        </div>
+        
+        <!-- 내가 추천한 후보자 -->
+        <div class="col-xl-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">내가 추천한 후보자</h6>
+                </div>
+                <div class="card-body">
+                    {% for candidate in dashboard_data.my_candidates %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 border-bottom">
+                        <div>
+                            <h6 class="mb-1">{{ candidate.name }}</h6>
+                            <small class="text-muted">{{ candidate.get_position_display }}</small>
+                        </div>
+                        <span class="badge bg-{{ candidate.get_status_color }}">{{ candidate.get_status_display }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">추천한 후보자가 없습니다.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- 진행 중인 채용 요청 -->
+        <div class="col-xl-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">진행 중인 채용 요청</h6>
+                </div>
+                <div class="card-body">
+                    {% for request in dashboard_data.active_assignments %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 border-bottom">
+                        <div>
+                            <h6 class="mb-1">{{ request.title }}</h6>
+                            <small class="text-muted">{{ request.position }}</small>
+                        </div>
+                        <span class="badge bg-{{ request.get_status_color }}">{{ request.get_status_display }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">진행 중인 채용 요청이 없습니다.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- 관리자 대시보드 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">
+                <i class="mdi mdi-shield-account me-2"></i>관리자 대시보드
+            </h5>
+        </div>
+        
+        <!-- 시스템 현황 -->
+        <div class="col-xl-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">시스템 현황</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h4 class="text-primary">{{ dashboard_data.total_organizations }}</h4>
+                            <small class="text-muted">등록 기관</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="text-success">{{ dashboard_data.total_users }}</h4>
+                            <small class="text-muted">전체 사용자</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="text-info">{{ dashboard_data.total_workflows }}</h4>
+                            <small class="text-muted">전체 워크플로우</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 최근 가입 기관 -->
+        <div class="col-xl-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">최근 가입 기관</h6>
+                </div>
+                <div class="card-body">
+                    {% for org in dashboard_data.recent_organizations %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 border-bottom">
+                        <div>
+                            <h6 class="mb-1">{{ org.name }}</h6>
+                            <small class="text-muted">{{ org.get_org_type_display }}</small>
+                        </div>
+                        <small class="text-muted">{{ org.created_at|date:'m/d' }}</small>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">최근 가입한 기관이 없습니다.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 빠른 액션 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">
+                <i class="fas fa-bolt me-2"></i>빠른 액션
+            </h5>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="quick-action" onclick="location.href='{% url 'workflow:job_request_create' %}'">
+                <i class="fas fa-plus-circle"></i>
+                <h6>채용 요청</h6>
+                <small class="text-muted">새로운 채용 요청 생성</small>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="quick-action" onclick="location.href='{% url 'candidates:create' %}'">
+                <i class="fas fa-user-plus"></i>
+                <h6>후보자 등록</h6>
+                <small class="text-muted">새로운 후보자 등록</small>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="quick-action" onclick="location.href='{% url 'workflow:list' %}'">
+                <i class="fas fa-list"></i>
+                <h6>워크플로우</h6>
+                <small class="text-muted">워크플로우 관리</small>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="quick-action" onclick="location.href='{% url 'reports:report_list' %}'">
+                <i class="fas fa-chart-bar"></i>
+                <h6>보고서</h6>
+                <small class="text-muted">성과 보고서 확인</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 진행률 링 애니메이션
+document.addEventListener('DOMContentLoaded', function() {
+    const progressRings = document.querySelectorAll('.progress-ring .progress');
+    
+    progressRings.forEach(ring => {
+        const progress = parseFloat(ring.getAttribute('data-progress'));
+        const circumference = 2 * Math.PI * 45; // r=45
+        const offset = circumference - (progress / 100) * circumference;
+        
+        ring.style.strokeDashoffset = offset;
+    });
+    
+    // 실시간 업데이트 시작
+    startLiveUpdates();
+    
+    // 프로세스 스테이지 상태 업데이트
+    updateProcessStages();
+});
+
+// 실시간 업데이트 (30초마다)
+function startLiveUpdates() {
+    setInterval(function() {
+        updateDashboardData();
+    }, 30000); // 30초
+}
+
+// 대시보드 데이터 업데이트
+function updateDashboardData() {
+    fetch('/dashboard/api/stats/')
+        .then(response => response.json())
+        .then(data => {
+            // 통계 업데이트
+            updateStats(data);
+            
+            // 프로세스 스테이지 업데이트
+            updateProcessStages();
+            
+            // 애니메이션 효과
+            document.body.classList.add('live-update');
+            setTimeout(() => {
+                document.body.classList.remove('live-update');
+            }, 500);
+            
+            console.log('Dashboard updated at', new Date().toLocaleTimeString());
+        })
+        .catch(error => console.error('Dashboard update failed:', error));
+}
+
+// 통계 업데이트
+function updateStats(data) {
+    // 통계 숫자 업데이트
+    const statElements = document.querySelectorAll('.stat-number');
+    statElements.forEach(element => {
+        const statType = element.getAttribute('data-stat');
+        const newValue = data[statType] || 0;
+        const currentValue = parseInt(element.textContent) || 0;
+        
+        if (newValue !== currentValue) {
+            element.textContent = newValue;
+            element.classList.add('updated');
+            setTimeout(() => {
+                element.classList.remove('updated');
+            }, 600);
+        }
+    });
+}
+
+// 프로세스 스테이지 상태 업데이트
+function updateProcessStages() {
+    const stages = document.querySelectorAll('.process-stage');
+    
+    stages.forEach((stage, index) => {
+        const statusIndicator = stage.querySelector('.process-status');
+        const icon = stage.querySelector('.stage-icon');
+        
+        // 랜덤하게 상태 변경 (실제로는 서버 데이터 기반)
+        const random = Math.random();
+        
+        if (random < 0.3) {
+            // 활성 상태
+            statusIndicator.className = 'process-status active';
+            icon.classList.add('active');
+            icon.classList.remove('processing');
+        } else if (random < 0.6) {
+            // 처리 중 상태
+            statusIndicator.className = 'process-status processing';
+            icon.classList.add('processing');
+            icon.classList.remove('active');
+        } else {
+            // 비활성 상태
+            statusIndicator.className = 'process-status';
+            icon.classList.remove('active', 'processing');
+        }
+    });
+}
+
+// 실시간 시계 업데이트
+function updateClock() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    
+    // 시계 요소가 있다면 업데이트
+    const clockElement = document.getElementById('live-clock');
+    if (clockElement) {
+        clockElement.textContent = timeString;
+    }
+}
+
+// 1초마다 시계 업데이트
+setInterval(updateClock, 1000);
+
+// 페이지 로드 시 시계 시작
+updateClock();
+
+// 마우스 호버 효과 강화
+document.addEventListener('DOMContentLoaded', function() {
+    const processStages = document.querySelectorAll('.process-stage');
+    
+    processStages.forEach(stage => {
+        stage.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        stage.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+});
+
+// 숫자 카운터 애니메이션
+function animateCounter(element, target, duration = 1000) {
+    const start = parseInt(element.textContent) || 0;
+    const increment = (target - start) / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
+            current = target;
+            clearInterval(timer);
+        }
+        element.textContent = Math.floor(current);
+    }, 16);
+}
+
+// 페이지 가시성 변경 시 업데이트
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        // 페이지가 다시 보일 때 즉시 업데이트
+        updateDashboardData();
+    }
+});
+</script>
+{% endblock %} 

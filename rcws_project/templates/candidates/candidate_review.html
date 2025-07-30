@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .score-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .score-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: white;
+        border-radius: 6px;
+        border-left: 4px solid #007bff;
+    }
+    .score-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    .score-input {
+        width: 100px;
+        text-align: center;
+    }
+    .total-score {
+        background: #e3f2fd;
+        border-left-color: #2196f3;
+        font-weight: bold;
+    }
+    .review-type-badge {
+        font-size: 0.9em;
+        padding: 4px 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 브레드크럼 -->
+    {% include 'includes/breadcrumbs.html' %}
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="mdi mdi-clipboard-check me-2"></i>{{ page_title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- 후보자 정보 요약 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">
+                                <i class="mdi mdi-account me-1"></i>후보자 정보
+                            </h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <p class="mb-1"><strong>이름:</strong> {{ candidate.name }}</p>
+                                    <p class="mb-1"><strong>지원 직무:</strong> {{ candidate.get_position_display }}</p>
+                                    <p class="mb-1"><strong>지점:</strong> {{ candidate.get_branch_display }}</p>
+                                    <p class="mb-1"><strong>추천자:</strong> {{ candidate.recommended_by.get_full_name }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="mb-1"><strong>현재 상태:</strong> 
+                                        <span class="badge bg-{% if candidate.status == 'waiting' %}warning{% elif candidate.status == 'approved' %}success{% elif candidate.status == 'rejected' %}danger{% else %}secondary{% endif %}">
+                                            {{ candidate.get_status_display }}
+                                        </span>
+                                    </p>
+                                    <p class="mb-1"><strong>검토 상태:</strong> 
+                                        <span class="badge bg-{% if candidate.review_status == 'pending' %}warning{% elif candidate.review_status == 'passed' %}success{% elif candidate.review_status == 'failed' %}danger{% else %}info{% endif %}">
+                                            {{ candidate.get_review_status_display }}
+                                        </span>
+                                    </p>
+                                    <p class="mb-1"><strong>추천일:</strong> {{ candidate.recommended_at|date:'Y-m-d' }}</p>
+                                    <p class="mb-1"><strong>경력:</strong> {{ candidate.total_experience_years }}년</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">
+                                <i class="mdi mdi-file-document me-1"></i>첨부 파일
+                            </h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    {% if candidate.resume_file %}
+                                        <p class="mb-1">
+                                            <a href="{{ candidate.resume_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="mdi mdi-file-pdf me-1"></i>이력서 보기
+                                            </a>
+                                        </p>
+                                    {% endif %}
+                                    {% if candidate.cover_letter %}
+                                        <p class="mb-1">
+                                            <a href="{{ candidate.cover_letter.url }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                                <i class="mdi mdi-file-document me-1"></i>자기소개서 보기
+                                            </a>
+                                        </p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-6">
+                                    {% if candidate.portfolio_file %}
+                                        <p class="mb-1">
+                                            <a href="{{ candidate.portfolio_file.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                                <i class="mdi mdi-folder-open me-1"></i>포트폴리오 보기
+                                            </a>
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- 검토 폼 -->
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- 검토 유형 선택 -->
+                                <div class="mb-4">
+                                    <label for="{{ form.review_type.id_for_label }}" class="form-label">
+                                        <i class="mdi mdi-clipboard-list me-1"></i>검토 유형
+                                    </label>
+                                    {{ form.review_type }}
+                                    {% if form.review_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.review_type.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- 점수 평가 섹션 -->
+                                <div class="score-section">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="mdi mdi-chart-line me-1"></i>항목별 평가
+                                    </h6>
+                                    
+                                    <!-- 경력 점수 -->
+                                    <div class="score-item">
+                                        <div class="score-label">
+                                            경력 점수 (25점 만점)
+                                            <small class="text-muted d-block">{{ form.experience_score.help_text }}</small>
+                                        </div>
+                                        <div class="score-input">
+                                            {{ form.experience_score }}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 학력 점수 -->
+                                    <div class="score-item">
+                                        <div class="score-label">
+                                            학력 점수 (20점 만점)
+                                            <small class="text-muted d-block">{{ form.education_score.help_text }}</small>
+                                        </div>
+                                        <div class="score-input">
+                                            {{ form.education_score }}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 스킬 점수 -->
+                                    <div class="score-item">
+                                        <div class="score-label">
+                                            스킬 점수 (25점 만점)
+                                            <small class="text-muted d-block">{{ form.skill_score.help_text }}</small>
+                                        </div>
+                                        <div class="score-input">
+                                            {{ form.skill_score }}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 인성 점수 -->
+                                    <div class="score-item">
+                                        <div class="score-label">
+                                            인성 점수 (15점 만점)
+                                            <small class="text-muted d-block">{{ form.personality_score.help_text }}</small>
+                                        </div>
+                                        <div class="score-input">
+                                            {{ form.personality_score }}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 동기 점수 -->
+                                    <div class="score-item">
+                                        <div class="score-label">
+                                            동기 점수 (15점 만점)
+                                            <small class="text-muted d-block">{{ form.motivation_score.help_text }}</small>
+                                        </div>
+                                        <div class="score-input">
+                                            {{ form.motivation_score }}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 총점 (자동 계산) -->
+                                    <div class="score-item total-score">
+                                        <div class="score-label">
+                                            총점 (100점 만점)
+                                            <small class="text-muted d-block">자동 계산됩니다</small>
+                                        </div>
+                                        <div class="score-input">
+                                            <span id="total-score-display">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 검토 의견 -->
+                                <div class="mb-4">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="mdi mdi-comment-text me-1"></i>검토 의견
+                                    </h6>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="{{ form.strengths.id_for_label }}" class="form-label">강점</label>
+                                            {{ form.strengths }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="{{ form.weaknesses.id_for_label }}" class="form-label">약점</label>
+                                            {{ form.weaknesses }}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <label for="{{ form.improvement_areas.id_for_label }}" class="form-label">개선 영역</label>
+                                        {{ form.improvement_areas }}
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <label for="{{ form.overall_comments.id_for_label }}" class="form-label">종합 의견</label>
+                                        {{ form.overall_comments }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <!-- 검토 가이드 -->
+                                <div class="card bg-light">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="mdi mdi-information me-1"></i>검토 가이드
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="text-primary">점수 기준</h6>
+                                        <ul class="small">
+                                            <li><strong>90-100점:</strong> A+ (매우 우수)</li>
+                                            <li><strong>80-89점:</strong> A (우수)</li>
+                                            <li><strong>70-79점:</strong> B+ (양호)</li>
+                                            <li><strong>60-69점:</strong> B (보통)</li>
+                                            <li><strong>50-59점:</strong> C (미흡)</li>
+                                            <li><strong>50점 미만:</strong> D (부적합)</li>
+                                        </ul>
+                                        
+                                        <hr>
+                                        
+                                        <h6 class="text-primary">합격 기준</h6>
+                                        <ul class="small">
+                                            <li><strong>70점 이상:</strong> 자동 합격</li>
+                                            <li><strong>70점 미만:</strong> 불합격</li>
+                                        </ul>
+                                        
+                                        <hr>
+                                        
+                                        <h6 class="text-primary">검토 시 고려사항</h6>
+                                        <ul class="small">
+                                            <li>직무 적합성</li>
+                                            <li>경력의 품질</li>
+                                            <li>스킬 보유도</li>
+                                            <li>성장 가능성</li>
+                                            <li>조직 적합성</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- 버튼 -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'candidates:detail' candidate.id %}" class="btn btn-secondary">
+                                <i class="mdi mdi-arrow-left me-1"></i>돌아가기
+                            </a>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="mdi mdi-content-save me-1"></i>검토 완료
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 총점 자동 계산
+function calculateTotalScore() {
+    const experienceScore = parseInt(document.getElementById('{{ form.experience_score.id_for_label }}').value) || 0;
+    const educationScore = parseInt(document.getElementById('{{ form.education_score.id_for_label }}').value) || 0;
+    const skillScore = parseInt(document.getElementById('{{ form.skill_score.id_for_label }}').value) || 0;
+    const personalityScore = parseInt(document.getElementById('{{ form.personality_score.id_for_label }}').value) || 0;
+    const motivationScore = parseInt(document.getElementById('{{ form.motivation_score.id_for_label }}').value) || 0;
+    
+    const totalScore = experienceScore + educationScore + skillScore + personalityScore + motivationScore;
+    document.getElementById('total-score-display').textContent = totalScore;
+    
+    // 총점에 따른 색상 변경
+    const totalScoreElement = document.getElementById('total-score-display');
+    if (totalScore >= 90) {
+        totalScoreElement.className = 'text-success fw-bold';
+    } else if (totalScore >= 80) {
+        totalScoreElement.className = 'text-primary fw-bold';
+    } else if (totalScore >= 70) {
+        totalScoreElement.className = 'text-warning fw-bold';
+    } else {
+        totalScoreElement.className = 'text-danger fw-bold';
+    }
+}
+
+// 점수 입력 필드에 이벤트 리스너 추가
+document.addEventListener('DOMContentLoaded', function() {
+    const scoreInputs = [
+        '{{ form.experience_score.id_for_label }}',
+        '{{ form.education_score.id_for_label }}',
+        '{{ form.skill_score.id_for_label }}',
+        '{{ form.personality_score.id_for_label }}',
+        '{{ form.motivation_score.id_for_label }}'
+    ];
+    
+    scoreInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('input', calculateTotalScore);
+            input.addEventListener('change', calculateTotalScore);
+        }
+    });
+    
+    // 초기 총점 계산
+    calculateTotalScore();
+});
+</script>
+{% endblock %} 

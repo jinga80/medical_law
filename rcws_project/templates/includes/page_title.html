@@ -1,0 +1,88 @@
+{% comment %}
+통일된 페이지 타이틀 템플릿
+
+사용법:
+{% include 'includes/page_title.html' with title="페이지 제목" icon="mdi-icon-name" breadcrumbs=breadcrumbs show_time=True show_user=True %}
+
+매개변수:
+- title: 페이지 제목 (필수)
+- icon: 아이콘 클래스 (선택, 기본값: mdi-view-dashboard)
+- breadcrumbs: 브레드크럼 리스트 (선택)
+- show_time: 시간 표시 여부 (선택, 기본값: True)
+- show_user: 사용자 정보 표시 여부 (선택, 기본값: True)
+- variant: 색상 변형 (선택, 기본값: primary, 옵션: simple, success, warning, info, dark)
+{% endcomment %}
+
+<div class="page-title-box {{ variant|default:'primary' }}">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="page-title-left">
+            <h4 class="page-title mb-2 fw-bold">
+                {% if icon %}
+                    <i class="mdi {{ icon }} page-icon"></i>
+                {% endif %}
+                {{ title }}
+            </h4>
+            
+            {% if breadcrumbs %}
+                <ol class="breadcrumb m-0">
+                    {% for breadcrumb in breadcrumbs %}
+                        {% if forloop.last %}
+                            <li class="breadcrumb-item active" aria-current="page">
+                                {% if breadcrumb.icon %}
+                                    <i class="mdi {{ breadcrumb.icon }} me-1"></i>
+                                {% endif %}
+                                {{ breadcrumb.text }}
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{{ breadcrumb.url }}" class="text-white-75 text-decoration-none">
+                                    {% if breadcrumb.icon %}
+                                        <i class="mdi {{ breadcrumb.icon }} me-1"></i>
+                                    {% endif %}
+                                    {{ breadcrumb.text }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ol>
+            {% endif %}
+        </div>
+        
+        {% if show_time|default:True or show_user|default:True %}
+            <div class="page-title-right">
+                <div class="d-flex align-items-center">
+                    {% if show_time|default:True %}
+                        <!-- 현재 시간 -->
+                        <div class="current-time">
+                            <div class="time-display">
+                                <i class="mdi mdi-clock"></i>
+                                <span class="time-text" id="current-time">--:--:--</span>
+                            </div>
+                            <div class="date-text" id="current-date">로딩 중...</div>
+                        </div>
+                        
+                        {% if show_user|default:True %}
+                            <!-- 구분선 -->
+                            <div class="vr text-white-50 mx-4" style="height: 50px;"></div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if show_user|default:True %}
+                        <!-- 사용자 정보 -->
+                        <div class="user-info">
+                            <div class="welcome-text">
+                                <i class="mdi mdi-account-circle me-1"></i>환영합니다
+                            </div>
+                            <div class="user-name">
+                                {{ request.user.get_full_name }}
+                            </div>
+                            <div class="user-role">
+                                {{ request.user.get_role_display }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div> 

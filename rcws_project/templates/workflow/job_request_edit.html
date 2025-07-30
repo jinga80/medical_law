@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}채용 요청 수정{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"채용 요청 수정" icon="mdi-file-document-edit" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">채용 요청 수정</h5>
+                    <p class="card-text">채용 요청 정보를 수정해주세요.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.position_title.id_for_label }}" class="form-label">직책</label>
+                                    {{ form.position_title }}
+                                    {% if form.position_title.errors %}
+                                        <div class="text-danger">{{ form.position_title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.department.id_for_label }}" class="form-label">부서</label>
+                                    {{ form.department }}
+                                    {% if form.department.errors %}
+                                        <div class="text-danger">{{ form.department.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.employment_type.id_for_label }}" class="form-label">고용 형태</label>
+                                    {{ form.employment_type }}
+                                    {% if form.employment_type.errors %}
+                                        <div class="text-danger">{{ form.employment_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.urgency_level.id_for_label }}" class="form-label">긴급도</label>
+                                    {{ form.urgency_level }}
+                                    {% if form.urgency_level.errors %}
+                                        <div class="text-danger">{{ form.urgency_level.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.salary_min.id_for_label }}" class="form-label">최소 급여 (만원)</label>
+                                    {{ form.salary_min }}
+                                    {% if form.salary_min.errors %}
+                                        <div class="text-danger">{{ form.salary_min.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.salary_max.id_for_label }}" class="form-label">최대 급여 (만원)</label>
+                                    {{ form.salary_max }}
+                                    {% if form.salary_max.errors %}
+                                        <div class="text-danger">{{ form.salary_max.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.job_description.id_for_label }}" class="form-label">직무 설명</label>
+                            {{ form.job_description }}
+                            {% if form.job_description.errors %}
+                                <div class="text-danger">{{ form.job_description.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.required_experience.id_for_label }}" class="form-label">필요 경력</label>
+                            {{ form.required_experience }}
+                            {% if form.required_experience.errors %}
+                                <div class="text-danger">{{ form.required_experience.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.preferred_qualifications.id_for_label }}" class="form-label">우대 사항</label>
+                            {{ form.preferred_qualifications }}
+                            {% if form.preferred_qualifications.errors %}
+                                <div class="text-danger">{{ form.preferred_qualifications.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.working_hours.id_for_label }}" class="form-label">근무 시간</label>
+                                    {{ form.working_hours }}
+                                    {% if form.working_hours.errors %}
+                                        <div class="text-danger">{{ form.working_hours.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.working_location.id_for_label }}" class="form-label">근무지</label>
+                                    {{ form.working_location }}
+                                    {% if form.working_location.errors %}
+                                        <div class="text-danger">{{ form.working_location.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <a href="{% url 'workflow:job_request_detail' job_request.id %}" class="btn btn-secondary">취소</a>
+                            <button type="submit" class="btn btn-primary">수정 완료</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

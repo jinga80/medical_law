@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}프로필 수정 - {{ request.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page title -->
+    <div class="row">
+        <div class="col-12">
+            {% with title=page_title|default:"프로필 수정" icon="mdi-account-edit" breadcrumbs=breadcrumbs %}
+                {% include 'includes/page_title.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- 프로필 이미지 -->
+                            <div class="col-md-4 text-center mb-4">
+                                <div class="profile-image-container">
+                                    {% if request.user.profile_image %}
+                                        <img src="{{ request.user.profile_image.url }}" alt="프로필 이미지" 
+                                             class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto mb-3" 
+                                             style="width: 150px; height: 150px;">
+                                            <span class="text-white fw-bold" style="font-size: 3rem;">
+                                                {{ request.user.first_name|first|upper }}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="form-group">
+                                        <label for="{{ form.profile_image.id_for_label }}" class="form-label">
+                                            <i class="mdi mdi-camera me-1"></i>프로필 이미지 변경
+                                        </label>
+                                        {{ form.profile_image }}
+                                        {% if form.profile_image.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.profile_image.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">
+                                            JPG, PNG 파일만 업로드 가능합니다. (최대 5MB)
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 기본 정보 -->
+                            <div class="col-md-8">
+                                <h5 class="mb-3">
+                                    <i class="mdi mdi-account-details me-2"></i>기본 정보
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                            <i class="mdi mdi-account me-1"></i>이름 *
+                                        </label>
+                                        {{ form.first_name }}
+                                        {% if form.first_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.first_name.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                            <i class="mdi mdi-account me-1"></i>성 *
+                                        </label>
+                                        {{ form.last_name }}
+                                        {% if form.last_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.last_name.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.email.id_for_label }}" class="form-label">
+                                            <i class="mdi mdi-email me-1"></i>이메일 *
+                                        </label>
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.email.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                            <i class="mdi mdi-phone me-1"></i>연락처
+                                        </label>
+                                        {{ form.phone }}
+                                        {% if form.phone.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.phone.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <h5 class="mb-3 mt-4">
+                                    <i class="mdi mdi-briefcase me-2"></i>직장 정보
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.department.id_for_label }}" class="form-label">
+                                            <i class="mdi mdi-office-building me-1"></i>부서
+                                        </label>
+                                        {{ form.department }}
+                                        {% if form.department.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.department.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.position.id_for_label }}" class="form-label">
+                                            <i class="mdi mdi-badge-account me-1"></i>직책
+                                        </label>
+                                        {{ form.position }}
+                                        {% if form.position.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.position.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.employee_id.id_for_label }}" class="form-label">
+                                            <i class="mdi mdi-card-account-details me-1"></i>사원번호
+                                        </label>
+                                        {{ form.employee_id }}
+                                        {% if form.employee_id.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.employee_id.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            <i class="mdi mdi-account-group me-1"></i>소속 기관
+                                        </label>
+                                        <input type="text" class="form-control" value="{{ request.user.organization.name }}" readonly>
+                                        <small class="form-text text-muted">소속 기관은 변경할 수 없습니다.</small>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            <i class="mdi mdi-shield-account me-1"></i>역할
+                                        </label>
+                                        <input type="text" class="form-control" value="{{ request.user.get_role_display }}" readonly>
+                                        <small class="form-text text-muted">역할은 관리자가 변경할 수 있습니다.</small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            <i class="mdi mdi-calendar me-1"></i>가입일
+                                        </label>
+                                        <input type="text" class="form-control" value="{{ request.user.date_joined|date:'Y년 m월 d일' }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- 버튼 -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-arrow-left me-1"></i>취소
+                                </a>
+                                <a href="{% url 'accounts:change_password' %}" class="btn btn-outline-warning ms-2">
+                                    <i class="mdi mdi-lock me-1"></i>비밀번호 변경
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="mdi mdi-content-save me-1"></i>저장
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-image-container {
+    position: relative;
+}
+
+.profile-image-container img {
+    border: 3px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.profile-image-container img:hover {
+    border-color: #667eea;
+    transform: scale(1.05);
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %} 

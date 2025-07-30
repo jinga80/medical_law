@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 데이터베이스
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: rcws_db
+      POSTGRES_USER: rcws_user
+      POSTGRES_PASSWORD: rcws_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - rcws_network
+
+  # Redis (Channels, Celery용)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - rcws_network
+
+  # Django 웹 애플리케이션
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=rcws_project.settings_production
+      - DB_HOST=db
+      - DB_NAME=rcws_db
+      - DB_USER=rcws_user
+      - DB_PASSWORD=rcws_password
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    networks:
+      - rcws_network
+
+  # Celery Worker
+  celery:
+    build: .
+    command: celery -A rcws_project worker -l info
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=rcws_project.settings_production
+      - DB_HOST=db
+      - DB_NAME=rcws_db
+      - DB_USER=rcws_user
+      - DB_PASSWORD=rcws_password
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    networks:
+      - rcws_network
+
+  # Celery Beat (스케줄러)
+  celery-beat:
+    build: .
+    command: celery -A rcws_project beat -l info
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=rcws_project.settings_production
+      - DB_HOST=db
+      - DB_NAME=rcws_db
+      - DB_USER=rcws_user
+      - DB_PASSWORD=rcws_password
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    networks:
+      - rcws_network
+
+  # Nginx (리버스 프록시)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - web
+    networks:
+      - rcws_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:
+
+networks:
+  rcws_network:
+    driver: bridge 
