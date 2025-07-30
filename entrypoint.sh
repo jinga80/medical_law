@@ -11,6 +11,12 @@ python manage.py migrate
 echo "📁 정적 파일 수집 중..."
 python manage.py collectstatic --noinput
 
-# 서버 시작
+# 서버 시작 (keep-alive 설정 추가)
 echo "🌐 서버 시작 중..."
-exec gunicorn medical_law_project.wsgi:application --bind 0.0.0.0:$PORT 
+
+# 백그라운드에서 keep-alive 스크립트 실행
+python keep_alive.py &
+KEEP_ALIVE_PID=$!
+
+# 메인 서버 시작
+exec gunicorn medical_law_project.wsgi:application --bind 0.0.0.0:$PORT --keep-alive 2 --timeout 120 
