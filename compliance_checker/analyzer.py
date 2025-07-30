@@ -49,11 +49,11 @@ class ComplianceAnalyzer:
                 except:
                     keywords_dict[rule.category] = []
         except:
-            # 기본 키워드 제공
+            # 기본 키워드 제공 (PDF 텍스트에서 발견될 수 있는 키워드들 포함)
             keywords_dict = {
-                '과장·절대적 표현': ['최고', '최고의', '완벽', '완전', '절대', '보장'],
-                '비교광고': ['비교', '더 나은', '우수한'],
-                '환자 후기·경험담': ['후기', '경험담', '환자분'],
+                '과장·절대적 표현': ['최고', '최고의', '완벽', '완전', '절대', '보장', '무통증', '완벽하게', '전혀', '100%'],
+                '비교광고': ['비교', '더 나은', '우수한', '다른 곳은', '다른 병원'],
+                '환자 후기·경험담': ['후기', '경험담', '환자분', '님의', '솔직한 후기', '생생 후기', '실제로'],
                 'SNS 미심의 광고': ['인스타그램', '페이스북', '유튜브']
             }
         return keywords_dict
@@ -111,7 +111,12 @@ class ComplianceAnalyzer:
             for rule in self.rules:
                 try:
                     rule_keywords = self.keywords.get(rule.category, [])
+                    print(f"[DEBUG] 규칙 '{rule.category}' 분석 중, 키워드 수: {len(rule_keywords)}")
+                    if rule_keywords:
+                        print(f"[DEBUG] 키워드 예시: {rule_keywords[:5]}")
+                    
                     found_violations = self._check_rule_violations(text, rule, rule_keywords)
+                    print(f"[DEBUG] 발견된 위반 수: {len(found_violations) if found_violations else 0}")
                     
                     if found_violations:
                         violations.append({
@@ -302,13 +307,12 @@ class ComplianceAnalyzer:
         lines = text.split('\n')
         
         for keyword in keywords:
-            # 일반적인 단어들은 제외 (컨텍스트 기반 검사)
-            if self._is_common_word(keyword, text):
-                continue
-                
+            print(f"[DEBUG] 키워드 '{keyword}' 검색 중...")
+            
             # 대소문자 구분 없이 검색
             pattern = re.compile(re.escape(keyword), re.IGNORECASE)
-            matches = pattern.finditer(text)
+            matches = list(pattern.finditer(text))
+            print(f"[DEBUG] '{keyword}' 매칭 수: {len(matches)}")
             
             for match in matches:
                 # 위반 키워드 주변 텍스트 추출 (전후 150자로 확장)
@@ -326,9 +330,17 @@ class ComplianceAnalyzer:
                 if not full_context:
                     full_context = context
                 
-                # 컨텍스트 기반 위반 여부 재확인
-                if not self._is_actual_violation(keyword, full_context, rule.category):
-                    continue
+                print(f"[DEBUG] '{keyword}' 발견! 컨텍스트: {full_context[:100]}...")
+                
+                # 일반적인 단어 제외 로직을 완화 - 의료광고법에서는 더 엄격하게
+                if rule.category in ['환자 후기·경험담', '과장·절대적 표현']:
+                    # 환자 후기와 과장 표현은 더 엄격하게 적용
+                    pass
+                else:
+                    # 컨텍스트 기반 위반 여부 재확인
+                    if not self._is_actual_violation(keyword, full_context, rule.category):
+                        print(f"[DEBUG] '{keyword}' 실제 위반 아님으로 제외")
+                        continue
                 
                 # 정확한 위치 정보 계산
                 line_number, column_number = self._find_exact_position(text, match.start(), lines)
