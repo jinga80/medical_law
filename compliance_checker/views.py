@@ -43,10 +43,14 @@ def test_view(request):
 
 def health_check(request):
     """헬스체크 엔드포인트"""
+    from django.conf import settings
     return JsonResponse({
         'status': 'healthy',
         'message': '서버가 정상 작동 중입니다',
-        'timestamp': timezone.now().isoformat()
+        'timestamp': timezone.now().isoformat(),
+        'debug': settings.DEBUG,
+        'allowed_hosts': settings.ALLOWED_HOSTS,
+        'host_header': request.META.get('HTTP_HOST', 'None')
     })
 
 def dashboard(request):

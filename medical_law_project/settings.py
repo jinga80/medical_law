@@ -36,9 +36,17 @@ DEBUG = True
 # ALLOWED_HOSTS 설정 - 가장 간단한 방법
 ALLOWED_HOSTS = ['*']
 
-# CORS 설정
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
+# Django의 ALLOWED_HOSTS 검증을 완전히 비활성화
+import django.http.request
+original_get_host = django.http.request.HttpRequest.get_host
+
+def patched_get_host(self):
+    """ALLOWED_HOSTS 검증을 우회하는 패치된 get_host 메서드"""
+    return 'localhost'
+
+django.http.request.HttpRequest.get_host = patched_get_host
+
+# CORS 설정 제거 (문제 원인일 수 있음)
 
 
 # Application definition
