@@ -351,6 +351,11 @@ def analyze_url(request):
         try:
             text = WebTextExtractor.extract_from_url(url, simple_mode=simple_mode)
             
+            # 디버깅을 위한 로깅
+            logger.info(f"URL: {url}")
+            logger.info(f"추출된 텍스트 길이: {len(text) if text else 0}")
+            logger.info(f"추출된 텍스트 미리보기: {text[:200] if text else 'None'}...")
+            
             if not text:
                 return JsonResponse({
                     'error': '웹페이지에서 텍스트를 추출할 수 없습니다. 다른 URL을 시도해보세요.'

@@ -65,17 +65,22 @@ class ComplianceAnalyzer:
     def analyze_text(self, text: str, source_type: str = "text") -> Dict[str, Any]:
         """텍스트 분석 및 준수 검토"""
         try:
-            if not text.strip():
+            # 디버깅을 위한 로깅
+            print(f"[DEBUG] 분석할 텍스트 길이: {len(text) if text else 0}")
+            print(f"[DEBUG] 텍스트 미리보기: {text[:100] if text else 'None'}...")
+            
+            if not text or not text.strip():
+                print("[DEBUG] 빈 텍스트로 인한 오류 반환")
                 return {
-                    'overall_score': 100,
-                    'compliance_status': '적합',
-                    'risk_level': 'low',
-                    'violations': [],
-                    'recommendations': [],
+                    'overall_score': 0,
+                    'compliance_status': '분석 불가',
+                    'risk_level': 'high',
+                    'violations': ['텍스트를 추출할 수 없습니다.'],
+                    'recommendations': ['유효한 URL을 입력하거나 텍스트를 직접 입력해주세요.'],
                     'detailed_violations': [],
                     'compliance_checklist': [],
                     'review_guidance': {},
-                    'extracted_text': text,
+                    'extracted_text': text or '',
                     'text_analysis': {
                         'total_characters': 0,
                         'total_words': 0,
