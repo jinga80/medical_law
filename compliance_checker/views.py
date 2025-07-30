@@ -23,6 +23,9 @@ from typing import List, Dict
 
 # Claude API 설정 - .env 파일 또는 시스템 환경변수에서 로드
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
+print(f"[DEBUG] ANTHROPIC_API_KEY 설정 상태: {'설정됨' if ANTHROPIC_API_KEY else '설정되지 않음'}")
+if ANTHROPIC_API_KEY:
+    print(f"[DEBUG] API 키 시작 부분: {ANTHROPIC_API_KEY[:20]}...")
 anthropic = Anthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
 
 # import openai  # 실제 OpenAI API 사용 시 주석 해제
@@ -1703,7 +1706,12 @@ def rewrite_text_with_ai(request):
         if not anthropic:
             return JsonResponse({
                 'success': False,
-                'error': 'Claude API가 설정되지 않았습니다.'
+                'error': 'Claude API가 설정되지 않았습니다.',
+                'details': {
+                    'message': 'AI 텍스트 재작성 기능을 사용하려면 ANTHROPIC_API_KEY 환경변수를 설정해야 합니다.',
+                    'solution': '1. Anthropic 웹사이트(https://console.anthropic.com)에서 API 키를 발급받으세요.\n2. Railway 대시보드의 Variables 탭에서 ANTHROPIC_API_KEY를 설정하세요.\n3. 애플리케이션을 재배포하세요.',
+                    'api_key_status': 'API 키가 설정되지 않음' if not ANTHROPIC_API_KEY else f'API 키 설정됨 (시작: {ANTHROPIC_API_KEY[:10]}...)'
+                }
             }, status=400)
         
         # AI 텍스트 재작성 실행

@@ -8,8 +8,10 @@ from .models import ComplianceRule, ComplianceKeyword, RecommendedExpression
 try:
     from anthropic import Anthropic
     ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
+    print(f"[DEBUG] Analyzer - ANTHROPIC_API_KEY 설정 상태: {'설정됨' if ANTHROPIC_API_KEY else '설정되지 않음'}")
     anthropic = Anthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
 except ImportError:
+    print("[DEBUG] Anthropic 라이브러리를 가져올 수 없습니다.")
     anthropic = None
 
 class ComplianceAnalyzer:
