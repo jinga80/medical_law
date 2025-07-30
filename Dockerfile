@@ -1,10 +1,6 @@
 # Python 3.9 이미지 사용
 FROM python:3.9-slim
 
-# 메모리 제한 설정
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-
 # 작업 디렉토리 설정
 WORKDIR /app
 

@@ -31,9 +31,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-zpn)9nnzcpn21x&9r$5=307ix!cfob&6ayfm06&8y(2xvne+x5')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+DEBUG = True
 
-ALLOWED_HOSTS = ['*']  # 임시로 모든 호스트 허용
+ALLOWED_HOSTS = ['*']
 
 # CORS 설정
 CORS_ALLOW_ALL_ORIGINS = True
@@ -99,9 +99,8 @@ DATABASES = {
 # Railway/Heroku PostgreSQL 설정
 if os.getenv('DATABASE_URL'):
     DATABASES['default'] = dj_database_url.config(
-        conn_max_age=0,  # 연결을 항상 새로 생성
+        conn_max_age=600,  # 기본값으로 복원
         conn_health_checks=True,
-        ssl_require=True,  # SSL 연결 강제
     )
 
 
@@ -148,41 +147,13 @@ STATICFILES_DIRS = [
 # WhiteNoise 설정
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# 세션 설정
-SESSION_COOKIE_AGE = 86400  # 24시간
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_SAVE_EVERY_REQUEST = True
+# 세션 설정 (기본값 사용)
 
 # Media files (Uploaded files)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# 로깅 설정
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'compliance_checker': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-    },
-}
+# 로깅 설정 (기본값 사용)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
