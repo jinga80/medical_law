@@ -30,21 +30,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-zpn)9nnzcpn21x&9r$5=307ix!cfob&6ayfm06&8y(2xvne+x5')
 
-# 디버그용 로그
-print(f"DEBUG: {DEBUG}")
-print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
-print(f"Current working directory: {os.getcwd()}")
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS 설정 - 모든 호스트 허용 (Django 보안 검사 비활성화)
-ALLOWED_HOSTS = ['*', 'medicallaw.up.railway.app', '.railway.app', 'localhost', '127.0.0.1', '0.0.0.0', '']
-
-# Django 보안 검사 비활성화
-USE_TZ = True
-SECURE_SSL_REDIRECT = False
-SECURE_PROXY_SSL_HEADER = None
+# ALLOWED_HOSTS 설정 - 가장 간단한 방법
+ALLOWED_HOSTS = ['*']
 
 # CORS 설정
 CORS_ALLOW_ALL_ORIGINS = True
@@ -64,7 +54,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'compliance_checker.middleware.AllowAllHostsMiddleware',  # 커스텀 미들웨어 추가
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -74,11 +63,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-# 보안 설정 완화
-SECURE_BROWSER_XSS_FILTER = False
-SECURE_CONTENT_TYPE_NOSNIFF = False
-X_FRAME_OPTIONS = 'ALLOWALL'
 
 ROOT_URLCONF = 'medical_law_project.urls'
 
