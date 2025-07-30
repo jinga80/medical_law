@@ -38,8 +38,13 @@ print(f"Current working directory: {os.getcwd()}")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS 설정 - 모든 호스트 허용
-ALLOWED_HOSTS = ['*', 'medicallaw.up.railway.app', '.railway.app', 'localhost', '127.0.0.1', '0.0.0.0']
+# ALLOWED_HOSTS 설정 - 모든 호스트 허용 (Django 보안 검사 비활성화)
+ALLOWED_HOSTS = ['*', 'medicallaw.up.railway.app', '.railway.app', 'localhost', '127.0.0.1', '0.0.0.0', '']
+
+# Django 보안 검사 비활성화
+USE_TZ = True
+SECURE_SSL_REDIRECT = False
+SECURE_PROXY_SSL_HEADER = None
 
 # CORS 설정
 CORS_ALLOW_ALL_ORIGINS = True
@@ -59,6 +64,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'compliance_checker.middleware.AllowAllHostsMiddleware',  # 커스텀 미들웨어 추가
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -68,6 +74,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# 보안 설정 완화
+SECURE_BROWSER_XSS_FILTER = False
+SECURE_CONTENT_TYPE_NOSNIFF = False
+X_FRAME_OPTIONS = 'ALLOWALL'
 
 ROOT_URLCONF = 'medical_law_project.urls'
 
