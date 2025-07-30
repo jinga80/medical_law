@@ -30,11 +30,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-zpn)9nnzcpn21x&9r$5=307ix!cfob&6ayfm06&8y(2xvne+x5')
 
+# 디버그용 로그
+print(f"DEBUG: {DEBUG}")
+print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
+print(f"Current working directory: {os.getcwd()}")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS 설정
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'medicallaw.up.railway.app,.railway.app,localhost,127.0.0.1,0.0.0.0').split(',')
+# ALLOWED_HOSTS 설정 - 모든 호스트 허용
+ALLOWED_HOSTS = ['*', 'medicallaw.up.railway.app', '.railway.app', 'localhost', '127.0.0.1', '0.0.0.0']
 
 # CORS 설정
 CORS_ALLOW_ALL_ORIGINS = True
